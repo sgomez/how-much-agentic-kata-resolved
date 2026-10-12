@@ -12,19 +12,20 @@ Four services share one game, and several pieces of its state could live in more
 | Current round number, finished phase | Games | Nobody: phones ask Games |
 | Each round by game and number: question, deadline, phase | Rounds | Scoring (deadline, ruler range, and the solution after the deadline) |
 | Estimates | Scoring | Nobody: phones ask Scoring |
-| Impostor of a round, votes, verdict | Impostor | Scoring (the verdict, once the voting is over) |
+| Impostor of a round, votes, verdict | Impostor | Scoring (the verdict, once the voting is over); Games (the verdict of the current round, before moving on in impostor mode) |
 | Points and scoreboard | Scoring, computed on read | Nobody: phones ask Scoring |
 
 ```
 Games → Rounds → Catalog
-          ↓
-       Impostor
+  │       ↓
+  └───→ Impostor
 Scoring → Games, Rounds, Impostor
 ```
 
 - **Estimates live in Scoring, not in Rounds.** Scoring is what compares them with the solution, and the acceptance driver already sends them through scoring. Scoring checks the deadline and the ruler range with Rounds before accepting one.
-- **Games keeps the current round number; Rounds only answers by game and number.** Games decides when the next round starts, so it is the only source of which round is current. It asks Rounds for round N+1 and only moves on once that round exists; when no question is left, the game is finished.
+- **Games keeps the current round number; Rounds only answers by game and number.** Games decides when the next round starts, so it is the only source of which round is current. It asks Rounds for round N+1 and only moves on once that round exists. The host moves the game on, also after the last round: when there is no round or no question left, the game is finished.
 - **Impostor chooses the impostor; Rounds keeps a copy.** Rounds needs to know who the impostor is to leave the question out of their view (ADR-0003 makes that a rule of whoever builds the view). It asks Impostor when it creates the round and keeps the answer, which never changes during the round and never appears in any view. Impostor receives the candidates, the host and the deadline at that moment, so it never asks anyone.
+- **In impostor mode, Games asks Impostor for the verdict before moving on.** The host cannot leave a round, the last one included, until its voting is over. Games only reads whether the verdict exists; the verdict itself stays with Impostor.
 - **The scoreboard is computed on read.** Scoring stores only estimates and works out the points from the solutions, the verdicts and the players each time someone asks. Scoring, not Impostor, turns a verdict into points.
 
 ## Considered Options
@@ -35,7 +36,8 @@ Scoring → Games, Rounds, Impostor
 
 ## Consequences
 
-- Services form no cycle: Games, Rounds, Catalog, Impostor and Scoring can each be tested with in-memory adapters for the ones they ask.
+- Services form no cycle: Games, Rounds, Catalog, Impostor and Scoring can each be tested with in-memory adapters for the ones they ask. Games asking Impostor keeps it that way, since Impostor asks nobody.
 - The round screen is composed by the phone: the current round number from Games, the round from Rounds and the player's own estimate from Scoring.
 - If Rounds ever lets the host close a round before its deadline, Rounds must tell Impostor the new deadline (same direction, no cycle).
+- In impostor mode, a voting nobody opens or closes blocks the game: the host cannot move on, and if Impostor is down, nobody can.
 - If the host can ever change during a game, the copy of the host that Impostor keeps for each round can go stale.
