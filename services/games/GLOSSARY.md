@@ -26,7 +26,7 @@ The game people gather in behind a code: who is in it, who runs it, its settings
 
 **Current round**: The number of the round a game is on. It only moves on once that round exists. _Avoid_: Turn, active round
 
-**Finished**: The last phase of a game, reached when its last round is revealed or its deck is exhausted. _Avoid_: Over, ended, closed
+**Finished**: The last phase of a game: the host ended it after the last round, or moved on when the deck was exhausted. _Avoid_: Over, ended, closed
 
 ### Borrowed terms
 
