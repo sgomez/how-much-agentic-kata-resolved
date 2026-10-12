@@ -1,45 +1,29 @@
 # Game glossary (DRAFT, to be resolved in the plenary)
 
-> **This is a draft, not a glossary.** It collects the words every group will use and leaves the hard calls open on purpose. Resolve each open question with `/grill-with-docs` in the plenary, then move the resolved term into the `GLOSSARY.md` of the service that owns it (see [GLOSSARY-MAP.md](../GLOSSARY-MAP.md)) and delete it from here. Until a term is resolved, do not build on any one reading of it.
+> **This is a draft, not a glossary.** It collects the words every group will use and leaves the hard calls open on purpose. Resolve each open question with `/grill-with-docs`, then move the resolved term into the `GLOSSARY.md` of the service that owns it (see [GLOSSARY-MAP.md](../GLOSSARY-MAP.md)) and delete it from here. Until a term is resolved, do not build on any one reading of it.
 
-The terms below are candidates, not decisions. Where several words compete, all of them are listed.
+Resolved in the plenary and moved to the service glossaries; ownership in ADR-0006. What follows is still open. Items marked **(fair)** go to the fair, where the groups involved settle them face to face.
 
-## People
+## Games
 
-**User / Player / Participant**: Someone holding a phone with a nickname. Are these the same thing? Is someone who signed in but never joined a game a player? Is the host a player? _Open_: Which one word do we use, and which do we avoid?
+**Host leaves**: Can the host change? What happens if the host's phone dies mid-game?
 
-**Host**: Whoever created the game. Can the host change? What happens if the host's phone dies mid-game?
+**Repeated nickname**: Is a nickname unique within a game? The games group leans towards "unique; a player whose nickname is already taken cannot join", but has not settled it.
 
-**Nickname**: The name others see. Unique within a game, or not? Two players called "Ana"?
+**Settings**: How many rounds, how long each lasts, which packs and whether impostor mode is on. Who chooses them, and can they change once players are in the lobby? Not asked in the plenary.
 
-## Playing together
+**Current round**: Which round a game is on right now, and who keeps track of it. Not asked in the plenary.
 
-**Game / Match / Lobby**: People gather behind a code and then play. **Game** names that match: the one thing players join with a code ("partida" on screen). When the same people play again, is that a new game with a new code, or the same one? Is the lobby a place or a moment of a game? _Open_: Do "match" and "lobby" survive, and what exactly does each name?
+**Starting a round (fair, with Rounds)**: What Games sends Rounds when it starts a round, and how Rounds learns whether the game is in impostor mode.
 
-**Settings**: How many rounds, how long each lasts, which packs and whether impostor mode is on. Whose are they, who chooses them, and can they change once players are in the lobby?
+## Scoring
 
-**Code**: What players type to join a game. Who makes it up, and is it unique forever or only while the game lasts?
+**Changing an estimate (fair)**: Can a player change their estimate before the deadline?
 
-**Round / Turn / Question**: Everyone estimates the same question before a deadline. Is a round the same as a question? Does the impostor round count as a different kind of round? Which round is a game on right now, and who keeps track of it?
+**Nicknames on the scoreboard (fair, with Games)**: Where Scoring gets the players' nicknames from.
 
-## Numbers
+**The impostor's estimate (fair, with Impostor)**: Is it in the race for the closest estimate? The scoring group proposes that it competes like any other.
 
-**Answer / Estimate / Guess / Solution**: A player sends a number; the question has a true number. Which word is which? (The catalog already calls the true number the **solution**.) Can a player change their number before the deadline? Is "no number sent" an estimate?
+## Impostor
 
-**Closest / Exact hit / Tie**: The closest estimate scores 3 points, an exact hit 2 more, ties score the same. Closest by absolute difference or by ratio? Does a tie of three players give 3 points to each? Is the impostor's estimate in the race?
-
-## Time
-
-**Deadline / Reveal / Close**: The round ends at a deadline the server decides; then the solution is revealed. Who **closes** a round: the clock, the host, the last estimate in? Are "closed" and "revealed" the same moment? What does a player see between the two?
-
-## Points
-
-**Score / Points / Scoreboard / Ranking / Leaderboard**: Points accumulate over the game. Where does the scoreboard live: is it stored, or computed each time someone looks? Who owns the points the impostor earns?
-
-## Impostor mode
-
-**Impostor**: In impostor games, each round one random player sees only the unit, not the question. Is "impostor" a role of a player, of a round, or of an estimate?
-
-**Vote / Suspect / Accusation**: After the reveal, players vote for who they think the impostor was. Does the impostor vote? Can someone vote for themselves? What if the vote ties?
-
-**Found / Caught / Unmasked**: If the impostor is not found they score 5 points. What does "found" mean exactly: most votes, a majority, everyone? What do the others score when the impostor is found?
+**Opening and closing the vote (fair, with Rounds)**: How Impostor knows when to open the vote without asking Rounds, and when the vote closes. The impostor group proposes opening it when the deadline passes and closing it when everyone has voted. Is there a time limit for voting?
