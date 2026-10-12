@@ -179,7 +179,7 @@ export const Deltas: S = {
       <ScoreDelta points={3} reason="closest" />
       <ScoreDelta points={2} reason="exact" />
       <ScoreDelta points={5} reason="impostor" />
-      <ScoreDelta points={1} reason="caught" />
+      <ScoreDelta points={2} reason="caught" />
       <ScoreDelta points={0} />
       <ScoreDelta points={3} size="sm" />
     </div>
