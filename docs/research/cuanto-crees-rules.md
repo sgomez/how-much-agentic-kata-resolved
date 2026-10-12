@@ -69,7 +69,7 @@ The online kata cannot be a copy: every player has their own phone and the serve
 | Closest | 3 points | 3 points ("the closest estimate scores 3 points") |
 | Exact | +2 | +2 ("an exact estimate scores 3 plus 2 points") |
 | Ties | Same points | Same points (estimates at the same absolute distance) |
-| 2nd and 3rd place | 2 and 1 points | Not tested |
+| 2nd and 3rd place | 2 and 1 points | 0 points: only the closest scores ("the closest estimate scores 3 points" expects `{ ana: 3, eva: 0, luis: 0 }`) |
 | Impostor escapes | 5 points | 5 points ("an impostor nobody votes for scores 5 points") |
 | Impostor caught | 0 for them, +2 for everyone else | Only "gets nothing for the vote" is tested; nothing about the others |
 | Reveal before the vote | Numbers without the solution | Not tested |
@@ -79,9 +79,8 @@ The online kata cannot be a copy: every player has their own phone and the serve
 
 These are for the groups to decide; the research only shows where the original and the tests leave room.
 
-1. Do second and third place score 2 and 1, or does only the closest score?
-2. When the impostor is caught, do the other players get 2 extra points?
-3. In impostor rounds, is the solution hidden until after the vote, as in the original?
-4. What counts as caught when the vote ties?
-5. Does the impostor's estimate compete for placement and exact points?
-6. The ruler is logarithmic in the original. Is it in ours, for every question?
+1. When the impostor is caught, do the other players get 2 extra points?
+2. In impostor rounds, is the solution hidden until after the vote, as in the original?
+3. What counts as caught when the vote ties?
+4. Does the impostor's estimate compete for placement and exact points?
+5. The ruler is logarithmic in the original. Is it in ours, for every question?
