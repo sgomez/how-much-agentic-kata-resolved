@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Frames, PhoneFrame } from "../stories/helpers.tsx";
 import { VerdictScreen } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/08 Verdict" };
+const meta: Meta = {
+  title: "Patterns/08 Verdict",
+  tags: ["games", "impostor", "scoring"],
+};
 export default meta;
 type S = StoryObj;
 

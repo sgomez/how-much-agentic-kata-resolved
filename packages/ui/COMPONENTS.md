@@ -2,6 +2,8 @@
 
 Every screen in `apps/web` is built from these components. Import them from `@hmk/ui` and nothing else. Run `pnpm storybook` to see every component and state, plus the example screens under `Patterns/`. The strings you pass in are Spanish (Spain). Numbers go through `formatNumber` or `formatWithUnit` (es-ES: `1.234.567,5`, `45 %`).
 
+Each `Patterns/` screen carries a coloured badge (`games`, `rounds`, `scoring`, `impostor`) for every group whose data it shows, so you can see which screens your service has to feed and which other services you have to ask; to see only yours, open the tag filter next to the sidebar search and tick your group.
+
 The rules for a screen:
 
 - One `Screen` per route. In-game screens get a `TopBar`. The main action is one `Button size="lg" fullWidth` inside `BottomActionBar`. `ConnectionBanner` goes in `Screen`'s `banner`; `Toast` and `BottomSheet` go in its `overlays`.

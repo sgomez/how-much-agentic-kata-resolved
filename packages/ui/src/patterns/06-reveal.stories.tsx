@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Frames, PhoneFrame } from "../stories/helpers.tsx";
 import { RevealScreen } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/06 Reveal" };
+const meta: Meta = {
+  title: "Patterns/06 Reveal",
+  tags: ["games", "rounds", "scoring"],
+};
 export default meta;
 type S = StoryObj;
 
@@ -34,6 +37,7 @@ export const NextRound: S = {
 };
 /** Open decision: does the impostor's estimate compete for points? */
 export const ImpostorEstimate: S = {
+  tags: ["impostor"],
   render: () => (
     <Frames>
       <PhoneFrame

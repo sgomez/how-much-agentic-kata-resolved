@@ -157,6 +157,9 @@ importers:
       storybook:
         specifier: 10.6.1
         version: 10.6.1(@types/react@19.3.0)(react@19.3.0)
+      storybook-addon-tag-badges:
+        specifier: 3.1.0
+        version: 3.1.0(storybook@10.6.1(@types/react@19.3.0)(react@19.3.0))
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -2263,6 +2266,12 @@ packages:
   magicast@0.5.5:
     resolution: {integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==}
 
+  map-or-similar@1.5.0:
+    resolution: {integrity: sha512-0aF7ZmVon1igznGI4VS30yugpduQW3y3GkcgGJOp7d8x8QrizhigUxjI/m2UojsXXto+jLAH3KSz+xOJTiORjg==}
+
+  memoizerific@1.11.3:
+    resolution: {integrity: sha512-/EuHYwAPdLtXwAwSZkh/Gutery6pD2KYd44oQLhAvQp/50mpyduZh8Q7PYHXTCJ+wuXxt7oij2LXyIJOOYFPog==}
+
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
@@ -2536,6 +2545,12 @@ packages:
 
   std-env@4.3.0:
     resolution: {integrity: sha512-OtU/EgQ1kIm5KwqQpBC6ZEMXrZRui11w8zgfTWp8cdO9B8OaPsbA8bTHO2P+HNo1VlUTGMVBwPhydu6poeXiag==}
+
+  storybook-addon-tag-badges@3.1.0:
+    resolution: {integrity: sha512-sVWVyUT8woEmSKDsePJtSFCP9RFojrmsibD11dL0/+pkn7HrkhaJC96uz3mnqt78OuO7qflFMLF1Bqg3JwnrJA==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      storybook: ^10.0.0
 
   storybook@10.6.1:
     resolution: {integrity: sha512-NeEmukMWPA5OqHizUkQtxCIhGt7MUZLPY4FFgpC0LNiipjrac/oKpH0TxI+9Zc+vI5+IoN+NiskOmBP7gtYfmA==}
@@ -4324,6 +4339,12 @@ snapshots:
       '@babel/types': 7.29.8
       source-map-js: 1.2.2
 
+  map-or-similar@1.5.0: {}
+
+  memoizerific@1.11.3:
+    dependencies:
+      map-or-similar: 1.5.0
+
   merge2@1.4.1: {}
 
   micromatch@4.0.8:
@@ -4651,6 +4672,11 @@ snapshots:
   source-map@0.6.1: {}
 
   std-env@4.3.0: {}
+
+  storybook-addon-tag-badges@3.1.0(storybook@10.6.1(@types/react@19.3.0)(react@19.3.0)):
+    dependencies:
+      memoizerific: 1.11.3
+      storybook: 10.6.1(@types/react@19.3.0)(react@19.3.0)
 
   storybook@10.6.1(@types/react@19.3.0)(react@19.3.0):
     dependencies:

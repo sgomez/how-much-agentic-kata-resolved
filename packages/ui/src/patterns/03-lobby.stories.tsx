@@ -9,7 +9,7 @@ import {
   duplicatePlayers,
 } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/03 Lobby" };
+const meta: Meta = { title: "Patterns/03 Lobby", tags: ["games"] };
 export default meta;
 type S = StoryObj;
 
@@ -145,6 +145,7 @@ export const HostLeaves: S = {
   ),
 };
 export const NicknameAfterJoin: S = {
+  tags: ["!games"],
   render: () => (
     <Frames>
       <PhoneFrame

@@ -3,7 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Frames, PhoneFrame } from "../stories/helpers.tsx";
 import { RoundScreen, WaitingScreen } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/05 After sending" };
+const meta: Meta = {
+  title: "Patterns/05 After sending",
+  tags: ["games", "rounds", "scoring"],
+};
 export default meta;
 type S = StoryObj;
 

@@ -4,11 +4,12 @@ import { QUESTIONS } from "../stories/fixtures.ts";
 import { Frames, PhoneFrame } from "../stories/helpers.tsx";
 import { RoundScreen, LateJoinScreen, ErrorScreen } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/04 Round" };
+const meta: Meta = { title: "Patterns/04 Round", tags: ["games", "rounds"] };
 export default meta;
 type S = StoryObj;
 
 export const PlayerAndImpostor: S = {
+  tags: ["scoring", "impostor"],
   render: () => (
     <Frames>
       <PhoneFrame
@@ -36,6 +37,7 @@ export const PlayerAndImpostor: S = {
   ),
 };
 export const OtherScales: S = {
+  tags: ["scoring"],
   render: () => (
     <Frames>
       <PhoneFrame label="0–100 %">
@@ -55,6 +57,7 @@ export const OtherScales: S = {
 };
 /** Open decision: does a round end early when everyone has answered? */
 export const EndsEarly: S = {
+  tags: ["scoring"],
   render: () => (
     <Frames>
       <PhoneFrame

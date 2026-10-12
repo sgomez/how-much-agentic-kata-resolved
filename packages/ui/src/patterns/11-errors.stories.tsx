@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Frames, PhoneFrame } from "../stories/helpers.tsx";
 import { ErrorScreen, RoundScreen } from "./screens.tsx";
 
-const meta: Meta = { title: "Patterns/11 Errors" };
+const meta: Meta = { title: "Patterns/11 Errors", tags: ["games"] };
 export default meta;
 type S = StoryObj;
 
@@ -29,6 +29,7 @@ export const JoinErrors: S = {
   ),
 };
 export const ConnectionLost: S = {
+  tags: ["rounds", "scoring"],
   render: () => (
     <Frames>
       <PhoneFrame
