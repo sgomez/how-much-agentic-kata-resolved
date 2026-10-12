@@ -29,7 +29,7 @@ describe(CatalogHttpAdapter, () => {
 
     expect(drawn).toStrictEqual(question);
     expect(requests[0]?.url).toBe(
-      "http://catalog.internal/decks/game%201/draws"
+      "http://catalog.internal/internal/decks/game%201/draws"
     );
     expect(requests[0]?.headers.get("authorization")).toBe("Bearer ana-token");
     await expect(requests[0]?.json()).resolves.toStrictEqual({

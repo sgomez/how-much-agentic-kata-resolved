@@ -19,7 +19,7 @@ export const catalogRoutes =
       return c.json(body);
     });
 
-    app.post("/decks/:gameId/draws", async (c) => {
+    app.post("/internal/decks/:gameId/draws", async (c) => {
       const { packs } = DrawQuestionRequest.parse(await c.req.json());
       const question = await deps.drawQuestion.execute({
         gameId: c.req.param("gameId"),

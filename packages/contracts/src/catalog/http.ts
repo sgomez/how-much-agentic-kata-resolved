@@ -47,7 +47,7 @@ export const ListPacksResponse = z.object({
 });
 export type ListPacksResponse = z.infer<typeof ListPacksResponse>;
 
-/** POST /decks/:gameId/draws */
+/** POST /internal/decks/:gameId/draws (service to service: the gateway blocks it, since a question carries its solution) */
 export const DrawQuestionRequest = z.object({
   /** Packs to draw from. Omit it to draw from every pack. */
   packs: z.array(z.string().min(1)).min(1).optional(),

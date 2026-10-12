@@ -20,7 +20,7 @@ export class CatalogHttpAdapter implements CatalogPort {
     const body: DrawQuestionRequest =
       packs === undefined || packs.length === 0 ? {} : { packs: [...packs] };
     const { question } = await this.#client.post(
-      `/decks/${encodeURIComponent(gameId)}/draws`,
+      `/internal/decks/${encodeURIComponent(gameId)}/draws`,
       body,
       DrawQuestionResponse
     );

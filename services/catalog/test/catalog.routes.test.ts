@@ -53,7 +53,7 @@ describe("catalog routes", () => {
   });
 
   it("draws a question for a game", async () => {
-    const res = await catalog().request("/decks/g1/draws", post({}));
+    const res = await catalog().request("/internal/decks/g1/draws", post({}));
 
     expect(res.status).toBe(201);
     expect(DrawQuestionResponse.parse(await res.json()).question.id).toBe("q1");
@@ -61,10 +61,13 @@ describe("catalog routes", () => {
 
   it("answers 409 when the deck is exhausted", async () => {
     const app = catalog();
-    await app.request("/decks/g1/draws", post({ packs: ["synthetic-b"] }));
+    await app.request(
+      "/internal/decks/g1/draws",
+      post({ packs: ["synthetic-b"] })
+    );
 
     const res = await app.request(
-      "/decks/g1/draws",
+      "/internal/decks/g1/draws",
       post({ packs: ["synthetic-b"] })
     );
 
@@ -75,7 +78,10 @@ describe("catalog routes", () => {
   });
 
   it("answers 400 to an invalid body", async () => {
-    const res = await catalog().request("/decks/g1/draws", post({ packs: [] }));
+    const res = await catalog().request(
+      "/internal/decks/g1/draws",
+      post({ packs: [] })
+    );
 
     expect(res.status).toBe(400);
   });
@@ -98,7 +104,7 @@ describe("catalog routes", () => {
     });
 
     await app.request("/test/next-question", post(rigged));
-    const res = await app.request("/decks/g7/draws", post({}));
+    const res = await app.request("/internal/decks/g7/draws", post({}));
 
     expect(DrawQuestionResponse.parse(await res.json()).question).toStrictEqual(
       rigged
@@ -112,8 +118,8 @@ describe("catalog routes", () => {
 
     await app.request("/test/next-question", post(stale));
     await app.request("/test/next-question", post(rigged));
-    const first = await app.request("/decks/g8/draws", post({}));
-    const second = await app.request("/decks/g8/draws", post({}));
+    const first = await app.request("/internal/decks/g8/draws", post({}));
+    const second = await app.request("/internal/decks/g8/draws", post({}));
 
     expect(DrawQuestionResponse.parse(await first.json()).question.id).toBe(
       "rigged"
