@@ -4,7 +4,7 @@ Runs impostor mode: picks the impostor of each round, collects the votes and dec
 
 ## Language
 
-**Impostor**: A player's role in one round of an impostor game: the one player who sees the unit but not the question. No player is the impostor in two consecutive rounds. _Avoid_: Spy, traitor, blind player
+**Impostor**: A player's role in one round of an impostor game: the one player who sees the unit but not the question. _Avoid_: Spy, traitor, blind player
 
 ### Voting
 

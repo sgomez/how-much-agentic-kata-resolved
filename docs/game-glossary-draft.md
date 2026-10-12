@@ -26,4 +26,6 @@ Resolved in the plenary and moved to the service glossaries; ownership in ADR-00
 
 ## Impostor
 
+**Impostor twice in a row**: Can the same player be the impostor in two consecutive rounds? The impostor group card leaves it for "if time allows".
+
 **Opening and closing the vote (fair, with Rounds)**: How Impostor knows when to open the vote without asking Rounds, and when the vote closes. The impostor group proposes opening it when the deadline passes and closing it when everyone has voted. Is there a time limit for voting?
