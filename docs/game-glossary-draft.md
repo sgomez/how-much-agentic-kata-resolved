@@ -1,45 +1,28 @@
-# Game glossary (DRAFT, to be resolved in the plenary)
+# Game glossary (DRAFT): what the plenary left open
 
-> **This is a draft, not a glossary.** It collects the words every group will use and leaves the hard calls open on purpose. Resolve each open question with `/grill-with-docs` in the plenary, then move the resolved term into the `GLOSSARY.md` of the service that owns it (see [GLOSSARY-MAP.md](../GLOSSARY-MAP.md)) and delete it from here. Until a term is resolved, do not build on any one reading of it.
+> **This is a draft, not a glossary.** The plenary resolved the shared words and moved each one into the `GLOSSARY.md` of the service that owns it (see [GLOSSARY-MAP.md](../GLOSSARY-MAP.md)); who owns which state is in [ADR-0006](./adr/0006-owners-of-the-game-state.md). What remains here is still open. Each question names the group that decides it. Until it is decided, do not build on any one reading of it. Once a group decides, move the answer into its glossary (or its ADRs) and delete the question from here.
 
-The terms below are candidates, not decisions. Where several words compete, all of them are listed.
+## Games
 
-## People
+- **Host leaving**: What happens when the host leaves or their phone dies mid-game? Does the role pass to another player, or does the game end? Impostor keeps a copy of the host for each round, so a host who changes mid-round would leave that copy stale.
+- **Editing settings in the lobby**: Settings are chosen when the game is created and do not change for now. Can the host edit them while the game is still in the lobby?
+- **Joining from the next round**: Joining a game after it has started is rejected. Should a late player be able to join from the next round instead?
+- **Moving to the next round**: Games decides when the next round starts. Does the host press a button, or does the game move on by itself after a few seconds? In a game in impostor mode, does the next round wait for the voting to end?
 
-**User / Player / Participant**: Someone holding a phone with a nickname. Are these the same thing? Is someone who signed in but never joined a game a player? Is the host a player? _Open_: Which one word do we use, and which do we avoid?
+## Rounds
 
-**Host**: Whoever created the game. Can the host change? What happens if the host's phone dies mid-game?
+- **Closing a round early**: Can the host close a round before its deadline? If so, Rounds must tell Impostor the new deadline.
+- **Ruler scale and step**: The ruler range, the scale and, if needed, the step come from the catalog, and Rounds copies them. Today the catalog's question has a ruler range but no scale or step. Changing the catalog is a shared change, through a PR.
 
-**Nickname**: The name others see. Unique within a game, or not? Two players called "Ana"?
+## Scoring
 
-## Playing together
+- **Points for catching the impostor**: In the original game, when the impostor is caught every other player gets 2 extra points. Do we add it?
+- **Absolute distance on large numbers**: Distance is an absolute difference, so being 10 off weighs the same whether the solution is 3 or 300,000. Recorded as a known risk.
 
-**Game / Match / Lobby**: People gather behind a code and then play. **Game** names that match: the one thing players join with a code ("partida" on screen). When the same people play again, is that a new game with a new code, or the same one? Is the lobby a place or a moment of a game? _Open_: Do "match" and "lobby" survive, and what exactly does each name?
+## Impostor
 
-**Settings**: How many rounds, how long each lasts, which packs and whether impostor mode is on. Whose are they, who chooses them, and can they change once players are in the lobby?
+- **Hiding the solution until after the vote**: In the original game, impostor rounds reveal the estimates without the solution, and the solution only after the vote. For now the solution is shown at the reveal, like in any round. Do we hide it?
 
-**Code**: What players type to join a game. Who makes it up, and is it unique forever or only while the game lasts?
+## Not discussed in the plenary
 
-**Round / Turn / Question**: Everyone estimates the same question before a deadline. Is a round the same as a question? Does the impostor round count as a different kind of round? Which round is a game on right now, and who keeps track of it?
-
-## Numbers
-
-**Answer / Estimate / Guess / Solution**: A player sends a number; the question has a true number. Which word is which? (The catalog already calls the true number the **solution**.) Can a player change their number before the deadline? Is "no number sent" an estimate?
-
-**Closest / Exact hit / Tie**: The closest estimate scores 3 points, an exact hit 2 more, ties score the same. Closest by absolute difference or by ratio? Does a tie of three players give 3 points to each? Is the impostor's estimate in the race?
-
-## Time
-
-**Deadline / Reveal / Close**: The round ends at a deadline the server decides; then the solution is revealed. Who **closes** a round: the clock, the host, the last estimate in? Are "closed" and "revealed" the same moment? What does a player see between the two?
-
-## Points
-
-**Score / Points / Scoreboard / Ranking / Leaderboard**: Points accumulate over the game. Where does the scoreboard live: is it stored, or computed each time someone looks? Who owns the points the impostor earns?
-
-## Impostor mode
-
-**Impostor**: In impostor games, each round one random player sees only the unit, not the question. Is "impostor" a role of a player, of a round, or of an estimate?
-
-**Vote / Suspect / Accusation**: After the reveal, players vote for who they think the impostor was. Does the impostor vote? Can someone vote for themselves? What if the vote ties?
-
-**Found / Caught / Unmasked**: If the impostor is not found they score 5 points. What does "found" mean exactly: most votes, a majority, everyone? What do the others score when the impostor is found?
+`packages/ui/docs/open-decisions.md` lists more product rules nobody has decided yet: the minimum number of players (Games), game capacity (Games), the game code format (Games), what the verdict shows (Impostor) and when the scoreboard appears (Scoring).
