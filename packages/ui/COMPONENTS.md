@@ -2,7 +2,7 @@
 
 Every screen in `apps/web` is built from these components. Import them from `@hmk/ui` and nothing else. Run `pnpm storybook` to see every component and state, plus the example screens under `Patterns/`. The strings you pass in are Spanish (Spain). Numbers go through `formatNumber` or `formatWithUnit` (es-ES: `1.234.567,5`, `45 %`).
 
-Each `Patterns/` screen carries a coloured badge (`games`, `rounds`, `scoring`, `impostor`) for every group whose data it shows, so you can see which screens your service has to feed and which other services you have to ask; to see only yours, open the tag filter next to the sidebar search and tick your group.
+Each `Patterns/` story shows, in the toolbar above the canvas, a coloured badge (`games`, `rounds`, `scoring`, `impostor`) for every group whose data it shows, so you can see which screens your service has to feed and which other services you have to ask; to see only yours, open the tag filter next to the sidebar search and tick your group.
 
 The rules for a screen:
 
