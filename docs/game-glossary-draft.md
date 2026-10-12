@@ -16,9 +16,11 @@ The terms below are candidates, not decisions. Where several words compete, all 
 
 **Game / Match / Lobby**: People gather behind a code and then play. **Game** names that match: the one thing players join with a code ("partida" on screen). When the same people play again, is that a new game with a new code, or the same one? Is the lobby a place or a moment of a game? _Open_: Do "match" and "lobby" survive, and what exactly does each name?
 
+**Settings**: How many rounds, how long each lasts, which packs and whether impostor mode is on. Whose are they, who chooses them, and can they change once players are in the lobby?
+
 **Code**: What players type to join a game. Who makes it up, and is it unique forever or only while the game lasts?
 
-**Round / Turn / Question**: Everyone estimates the same question before a deadline. Is a round the same as a question? Does the impostor round count as a different kind of round?
+**Round / Turn / Question**: Everyone estimates the same question before a deadline. Is a round the same as a question? Does the impostor round count as a different kind of round? Which round is a game on right now, and who keeps track of it?
 
 ## Numbers
 

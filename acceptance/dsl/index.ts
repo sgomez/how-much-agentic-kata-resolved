@@ -5,10 +5,10 @@
 import { randomUUID } from "node:crypto";
 
 import { gatewayDrivers } from "../drivers/index.ts";
-import type { Drivers, JoinOutcome, Player, RoundView } from "./drivers.ts";
+import type { Drivers, JoinOutcome, Player, RoundScreen } from "./drivers.ts";
 import { waitFor } from "./wait.ts";
 
-export type { RoundView } from "./drivers.ts";
+export type { RoundScreen } from "./drivers.ts";
 export { PendingContractError } from "./pending-contract.ts";
 
 /** Short rounds keep the suite fast; the deadline still decides the reveal. */
@@ -62,7 +62,7 @@ export interface Game {
   /** Points per alias, as the host's scoreboard shows them. */
   scoreboard: () => Promise<Record<string, number>>;
   /** What this player's round screen shows now (like reopening the app). */
-  viewOf: (alias: string) => Promise<RoundView>;
+  viewOf: (alias: string) => Promise<RoundScreen>;
   /** The one player whose screen does not show the question. */
   whoIsTheImpostor: () => Promise<string>;
   /** The game moves on to the vote, then each listed player votes for a suspect (by alias). */
@@ -110,12 +110,12 @@ export const newGame = async ({
   }
   await drivers.games.startGame(host, code);
 
-  const roundOf = async (player: Player): Promise<RoundView | undefined> =>
+  const roundOf = async (player: Player): Promise<RoundScreen | undefined> =>
     (await drivers.rounds.currentRound(player, code)) ?? undefined;
 
   const everyoneSees = (
     description: string,
-    seen: (view: RoundView) => boolean,
+    seen: (view: RoundScreen) => boolean,
     timeoutMs?: number
   ) =>
     waitFor(

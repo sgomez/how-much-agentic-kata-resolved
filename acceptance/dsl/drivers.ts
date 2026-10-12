@@ -64,8 +64,12 @@ export interface GamesDriver {
   nextRound: (host: Player, code: string) => Promise<void>;
 }
 
-/** What a player's round screen shows. */
-export interface RoundView {
+/**
+ * What a player's round screen shows. This is the screen, not the response of
+ * any one service: like the phone, the driver may compose it from several
+ * services, each answering for the data it owns.
+ */
+export interface RoundScreen {
   /** 1 for the first question of the game, 2 for the next one... */
   number: number;
   phase: "estimating" | "revealed";
@@ -84,10 +88,10 @@ export interface RoundView {
 export interface RoundsDriver {
   /**
    * The round on this player's screen, or null while there is none.
-   * Some of what the screen shows (such as `myEstimate`) may live in data the
-   * rounds group does not own; like the phone, the driver may call any public API.
+   * Some of what the screen shows (such as `myEstimate`) may live in a service
+   * other than rounds; like the phone, the driver may call any public API.
    */
-  currentRound: (player: Player, code: string) => Promise<RoundView | null>;
+  currentRound: (player: Player, code: string) => Promise<RoundScreen | null>;
 }
 
 export interface ScoreLine {

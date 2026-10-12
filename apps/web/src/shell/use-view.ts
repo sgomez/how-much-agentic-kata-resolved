@@ -9,7 +9,7 @@ export const POLL_INTERVAL_MS = 1000;
  * Reconnecting needs nothing special: the next poll returns the full view.
  *
  * ```ts
- * const { data: view } = useView(["round", gameCode], () => api<RoundView>(`/rounds/${gameCode}/view`));
+ * const { data: view } = useView(["game", gameCode], () => api<GameView>(`/games/${gameCode}`));
  * ```
  */
 export const useView = <T>(key: QueryKey, fetcher: () => Promise<T>) =>

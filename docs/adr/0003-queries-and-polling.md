@@ -4,7 +4,7 @@ status: accepted
 
 # Communication by queries and polling, without push
 
-Players must see the question, the reveal and the scoreboard almost at the same time, and some services depend on what happens in others: scoring needs the estimates from rounds and the outcome of the impostor vote. A player who loses the connection must get their full state back when they return. This is a proof of concept for a two-hour kata: time spent on real-time infrastructure is taken from the time the groups spend on the skills workflow, which is the point of the kata. So **nobody pushes anything; everything is asked for.**
+Players must see the question, the reveal and the scoreboard almost at the same time, and some services depend on what happens in others: scoring needs the solution of each round and the outcome of the impostor vote. A player who loses the connection must get their full state back when they return. This is a proof of concept for a two-hour kata: time spent on real-time infrastructure is taken from the time the groups spend on the skills workflow, which is the point of the kata. So **nobody pushes anything; everything is asked for.**
 
 - **Phones → server:** each screen asks for its **view** through the gateway about once a second (TanStack Query `refetchInterval`, wrapped in `useView` in `apps/web/src/shell`). Player actions (join, estimate, vote) are POSTs.
 - **Service → service:** when a service needs something from another, it asks over HTTP through a port in `domain/ports/`, with an HTTP adapter and an in-memory adapter in `infra/`.
@@ -24,7 +24,7 @@ Players must see the question, the reveal and the scoreboard almost at the same 
 ## Consequences
 
 - The contracts in `@hmk/contracts` are HTTP only: there are no event schemas.
-- A service may compute what it shows on read instead of storing it; for example, scoring could be a stateless calculator that asks rounds and impostor and applies the rules.
+- A service may compute what it shows on read instead of storing it; for example, scoring could store only what it owns and work out the points each time someone asks, by asking other services for what it needs.
 - There is up to one second of delay. With rounds of a couple of minutes it does not affect the game.
 - The load is one request per player per second: about 20 per second in the final game.
 - Acceptance tests wait by polling until a condition holds, with no message inboxes.
