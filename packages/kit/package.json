@@ -1,0 +1,17 @@
+{
+  "name": "@hmk/kit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./topology": "./src/topology.ts"
+  },
+  "dependencies": {
+    "@hmk/auth": "workspace:*",
+    "@hmk/contracts": "workspace:*",
+    "@hono/node-server": "^2.1.4",
+    "hono": "^4.13.13",
+    "zod": "^4.6.5"
+  }
+}

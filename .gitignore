@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-types/
+storybook-static/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Question content is distributed by the facilitator, never committed (ADR-0005).
+data/*
+!data/.gitkeep

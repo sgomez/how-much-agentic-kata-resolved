@@ -1,0 +1,34 @@
+{
+  "name": "how-much-agentic-kata",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --parallel --recursive --filter \"./services/*\" --filter \"./apps/web\" run dev",
+    "start": "pnpm --filter @hmk/web build && pnpm --parallel --recursive --filter \"./services/*\" run start",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm depcruise && pnpm test",
+    "fix": "ultracite fix",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "typecheck": "tsc -b",
+    "depcruise": "depcruise packages services apps acceptance --config .dependency-cruiser.cjs --output-type err-long",
+    "test": "vitest run",
+    "acceptance": "vitest run --config acceptance/vitest.config.ts",
+    "storybook": "pnpm --filter @hmk/ui storybook",
+    "catalog:validate": "node services/catalog/scripts/validate-questions.ts",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "dependency-cruiser": "18.5.0",
+    "lefthook": "^2.2.1",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "typescript": "6.0.3",
+    "ultracite": "7.12.4",
+    "vitest": "5.0.3"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

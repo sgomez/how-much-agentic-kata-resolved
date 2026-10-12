@@ -1,0 +1,30 @@
+# Who reviews what. Fill in the GitHub handles on the day: uncomment each line and
+# replace the placeholder with the members of the group (e.g. @alice @bob).
+# Later lines win over earlier ones.
+
+# Shared foundations: reviewed by the facilitator.
+# *                                    @<facilitator>
+
+# games group
+# services/games/                      @<games-group-member>
+# packages/contracts/src/games/        @<games-group-member>
+# apps/web/src/features/games/         @<games-group-member>
+# acceptance/drivers/games.ts          @<games-group-member>
+
+# rounds group
+# services/rounds/                     @<rounds-group-member>
+# packages/contracts/src/rounds/       @<rounds-group-member>
+# apps/web/src/features/rounds/        @<rounds-group-member>
+# acceptance/drivers/rounds.ts         @<rounds-group-member>
+
+# scoring group
+# services/scoring/                    @<scoring-group-member>
+# packages/contracts/src/scoring/      @<scoring-group-member>
+# apps/web/src/features/scoring/       @<scoring-group-member>
+# acceptance/drivers/scoring.ts        @<scoring-group-member>
+
+# impostor group
+# services/impostor/                   @<impostor-group-member>
+# packages/contracts/src/impostor/     @<impostor-group-member>
+# apps/web/src/features/impostor/      @<impostor-group-member>
+# acceptance/drivers/impostor.ts       @<impostor-group-member>

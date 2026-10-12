@@ -1,0 +1,9 @@
+{
+  "name": "@hmk/tooling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "dependency-cruiser": "18.5.0"
+  }
+}

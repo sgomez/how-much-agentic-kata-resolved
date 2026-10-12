@@ -1,0 +1,17 @@
+{
+  "name": "@hmk/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./catalog": "./src/catalog/http.ts",
+    "./games": "./src/games/http.ts",
+    "./rounds": "./src/rounds/http.ts",
+    "./scoring": "./src/scoring/http.ts",
+    "./impostor": "./src/impostor/http.ts"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  }
+}

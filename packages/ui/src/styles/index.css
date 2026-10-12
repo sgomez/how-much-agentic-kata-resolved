@@ -1,0 +1,63 @@
+/* A ojo — entry stylesheet. Import once in your app root (and in .storybook/preview.ts). */
+@import "tailwindcss";
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/atkinson-hyperlegible-next/wght.css";
+@import "./tokens.css";
+@import "./motion.css";
+
+/* Tailwind scans the components so their classes ship with the app. */
+@source "../components";
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* One focus style everywhere: solid, 3px, drawn on the surface around the control. */
+  :focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+/* Condensed display numerals (Archivo wdth axis). Used by the estimate, codes and scores. */
+@utility condensed {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 78;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sticker press: raised controls sink into their shadow while pressed. */
+@utility pressable {
+  transition-property:
+    transform, box-shadow, background-color, border-color, color;
+  transition-duration: var(--duration-instant);
+  transition-timing-function: var(--ease-out);
+  &:active:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(var(--press-depth, 4px));
+    box-shadow: none;
+  }
+}

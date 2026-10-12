@@ -1,0 +1,21 @@
+# Git hooks (https://lefthook.dev), installed by `pnpm install`.
+# They only look at staged files; `pnpm check` is still the full gate.
+pre-commit:
+  piped: true
+  jobs:
+    - name: format
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css,md,yml,yaml}"
+      run: pnpm exec oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+    - name: lint
+      glob: "*.{js,jsx,ts,tsx,mjs,cjs}"
+      run: pnpm exec oxlint --fix {staged_files}
+      stage_fixed: true
+    - name: architecture
+      glob: "{packages,services,apps,acceptance}/**/*.{ts,tsx}"
+      run: pnpm exec depcruise --config .dependency-cruiser.cjs --output-type err-long {staged_files}
+
+commit-msg:
+  jobs:
+    - name: conventional-commit-in-english
+      run: node tooling/check-commit-msg.ts {1}

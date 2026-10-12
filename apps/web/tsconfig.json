@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src", "test", "vite.config.ts"],
+  "references": [
+    { "path": "../../packages/contracts" },
+    { "path": "../../packages/kit" },
+    { "path": "../../packages/ui" }
+  ]
+}

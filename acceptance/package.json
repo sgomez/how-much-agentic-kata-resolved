@@ -1,0 +1,11 @@
+{
+  "name": "@hmk/acceptance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hmk/contracts": "workspace:*",
+    "@hmk/kit": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

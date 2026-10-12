@@ -1,0 +1,20 @@
+{
+  "name": "@hmk/gateway",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/main.ts",
+    "start": "node src/main.ts"
+  },
+  "dependencies": {
+    "@hmk/auth": "workspace:*",
+    "@hmk/kit": "workspace:*",
+    "@hono/node-server": "^2.1.4",
+    "better-auth": "^1.7.7",
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "jose": "^6.2.12"
+  }
+}

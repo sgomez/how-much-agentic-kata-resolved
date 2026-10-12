@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/contracts" },
+    { "path": "packages/auth" },
+    { "path": "packages/kit" },
+    { "path": "packages/ui" },
+    { "path": "apps/web" },
+    { "path": "services/gateway" },
+    { "path": "services/catalog" },
+    { "path": "services/games" },
+    { "path": "services/rounds" },
+    { "path": "services/scoring" },
+    { "path": "services/impostor" },
+    { "path": "acceptance" },
+    { "path": "tooling" }
+  ]
+}

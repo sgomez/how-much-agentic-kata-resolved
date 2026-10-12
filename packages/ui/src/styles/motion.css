@@ -1,0 +1,114 @@
+/* Motion tokens as Tailwind animations: animate-pop, animate-rise, … */
+@theme {
+  --animate-pop: pop var(--duration-fast) var(--ease-spring) both;
+  --animate-rise: rise var(--duration-base) var(--ease-out) both;
+  --animate-fade: fade var(--duration-base) var(--ease-out) both;
+  --animate-sheet: sheet var(--duration-base) var(--ease-out) both;
+  --animate-stamp: stamp var(--duration-slow) var(--ease-spring) both;
+  --animate-drop: drop var(--duration-reveal) var(--ease-spring) both;
+  --animate-draw: draw var(--duration-reveal) var(--ease-out) both;
+  --animate-urgent: urgent 1s var(--ease-in-out) infinite;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-spin: spin 0.8s linear infinite;
+
+  @keyframes pop {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  @keyframes rise {
+    from {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes sheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes stamp {
+    from {
+      transform: scale(1.6) rotate(-8deg);
+      opacity: 0;
+    }
+    to {
+      transform: rotate(-3deg);
+      opacity: 1;
+    }
+  }
+  @keyframes drop {
+    from {
+      transform: translateY(-24px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes urgent {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Everything respects reduced motion: animations end instantly, transitions too.
+   Meaning is never carried by motion alone (urgency also changes colour, weight and the label). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

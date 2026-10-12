@@ -1,0 +1,17 @@
+{
+  "name": "@hmk/catalog",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "HMK_TEST_MODE=1 node --watch src/main.ts",
+    "start": "node src/main.ts",
+    "validate": "node scripts/validate-questions.ts"
+  },
+  "dependencies": {
+    "@hmk/auth": "workspace:*",
+    "@hmk/contracts": "workspace:*",
+    "@hmk/kit": "workspace:*",
+    "zod": "^4.6.5"
+  }
+}

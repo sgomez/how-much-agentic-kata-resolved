@@ -1,0 +1,4 @@
+/* The design system's stylesheet loads Tailwind, the fonts and the tokens. */
+@import "@hmk/ui/styles.css";
+/* Generate the utilities this app's own files use too. */
+@source "./";

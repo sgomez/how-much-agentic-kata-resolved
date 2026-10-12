@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+  - services/*
+  - apps/*
+  - acceptance
+  - tooling
+allowBuilds:
+  esbuild: true
+  lefthook: true
+# Run package scripts with a cross-platform shell (env assignments work on Windows too).
+shellEmulator: true
