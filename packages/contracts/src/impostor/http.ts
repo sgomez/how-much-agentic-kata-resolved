@@ -69,6 +69,10 @@ const verdictAndImpostorTogether = (body: {
  * GET /internal/:code/:n/verdict (called by scoring for the scoreboard, and
  * by games before moving on to the next round in impostor mode).
  * 404 `round-not-found` when this service has no impostor for that round.
+ * This service cannot tell a round without impostor from one it lost (it keeps
+ * everything in memory and nobody tells it which games are in impostor mode):
+ * a caller that knows the game is in impostor mode must treat 404 as a failure,
+ * not as "no impostor".
  */
 export const VerdictResponse = z
   .object({
