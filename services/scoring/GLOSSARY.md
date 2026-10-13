@@ -16,14 +16,16 @@ The estimates players send and the points they earn: who came closest, who hit t
 
 **Exact hit**: An estimate equal to the solution, with no margin and no rounding. It scores 2 points on top of the 3 for the closest. _Avoid_: Bullseye, perfect, exact answer
 
-**Scoreboard**: Every player of a game with the points earned so far, added up over its revealed rounds and the verdicts of its finished votings. Players without points appear with 0. _Avoid_: Ranking, leaderboard, standings, score
+**Scoreboard**: Every player of a game with the points earned so far, added up over its revealed rounds and the verdicts of its finished votings. Players without points appear with 0, and players tied on points keep the order in which they joined. Only the game's players see it, after every round and at the end of the game. _Avoid_: Ranking, leaderboard, standings, score
+
+**Catching bonus**: The 2 points every player except the impostor scores in a round whose verdict is caught, whoever they voted for. _Avoid_: Catcher points, team bonus, +2
 
 ### Borrowed terms
 
 **Player**: See the [Games glossary](../games/GLOSSARY.md).
 
-**Round**, **Deadline**: See the [Rounds glossary](../rounds/GLOSSARY.md).
+**Round**, **Deadline**, **Revealed**: See the [Rounds glossary](../rounds/GLOSSARY.md). Estimates count while a round is estimating; a round only scores once it is revealed.
 
 **Solution**, **Ruler range**: See the [Catalog glossary](../catalog/GLOSSARY.md).
 
-**Verdict**, **Caught**, **Escaped**: See the [Impostor glossary](../impostor/GLOSSARY.md). Scoring turns a verdict into points: an impostor who escapes scores 5, one who is caught scores 0.
+**Verdict**, **Caught**, **Escaped**: See the [Impostor glossary](../impostor/GLOSSARY.md). Scoring turns a verdict into points: an impostor who escapes scores 5; one who is caught scores 0, and every other player gets the catching bonus.
