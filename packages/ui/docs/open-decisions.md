@@ -14,10 +14,6 @@ Each group settles these rules during the workshop. The system takes no side: ev
 |  | Rejected on join | `Input error="Ya hay una Lucía en esa partida. Elige otro apodo."` | Patterns/03 · RepeatedNicknames |
 | Game capacity | Unlimited | `Badge icon="users"` with the count | Patterns/03 · GameCapacity |
 |  | Full game | Badge "20 / 20"; joiners see the "La partida está llena" `EmptyState` | Patterns/03 · GameCapacity |
-| Vote can change? | Final once cast | `VoteOption voted locked` | Patterns/07 · VoteChange |
-|  | Changeable until voting closes | `VoteOption voted` (no `locked`); tapping another tile moves the vote | Patterns/07 · VoteChange |
-| Self-vote, and does the impostor vote? | Both allowed | Your tile is enabled (note "Eres tú") | Patterns/07 · SelfAndImpostor |
-|  | Both forbidden | Your tile is `disabled` with the note "Eres tú · no puedes" (or leave it out); the impostor sees `EmptyState icon="mask" title="Esta vez no votas"` | Patterns/07 · SelfAndImpostor |
 | What the verdict shows | Only caught or not | `VerdictCard` without `votes` | Patterns/08 · WhatItShows |
 |  | Also who voted for whom | `VerdictCard votes={…}` | Patterns/08 · WhatItShows |
 | Scoreboard timing | After every round | A `Scoreboard` screen between rounds | Patterns/09 · WhenItAppears |
@@ -32,13 +28,20 @@ Each group settles these rules during the workshop. The system takes no side: ev
 | Does the impostor's estimate compete? | Yes, shown like the rest | A normal entry | Patterns/06 · ImpostorEstimate |
 |  | No, shown apart | `excluded: true` (dashed, never closest, listed under "Fuera de concurso") | Patterns/06 · ImpostorEstimate |
 |  | No, hidden | Leave the entry out | Patterns/06 · ImpostorEstimate |
-| Tie in the impostor vote | Counts as caught | `VerdictCard outcome="caught" detail="Empate a 2 votos: cuenta como pillado"` | Patterns/08 · Tie |
-|  | Counts as not caught | `outcome="escaped" detail="Empate a 2 votos: se libra"` | Patterns/08 · Tie |
-|  | No verdict | `outcome="none" detail="Empate a 2 votos"` | Patterns/08 · Tie |
 | Others score for catching the impostor? | No | Only the impostor's `ScoreDelta` | Patterns/08 · CatchersScore |
 |  | Yes | One `ScoreDelta points={1} reason="caught"` per catcher | Patterns/08 · CatchersScore |
 | Who moves to the next round | The host, with a button | Host: `Button` "Siguiente ronda". Players: `hint="Lucía pasará a la siguiente ronda"` | Patterns/06 · NextRound |
 |  | Automatically after a few seconds | `Countdown variant="bar" label="Siguiente ronda en"` | Patterns/06 · NextRound, Patterns/09 |
+
+## Settled by the Impostor glossary
+
+These were open here, and the plenary settled them in the [Impostor glossary](../../../services/impostor/GLOSSARY.md). The Patterns stories still draw every variant; build only this one.
+
+| Decision | Settled as | How to build it | Story |
+| --- | --- | --- | --- |
+| Vote can change? | Final once cast | `VoteOption voted locked` | Patterns/07 · VoteChange |
+| Self-vote, and does the impostor vote? | Nobody votes for themselves; the impostor votes like everyone else | Your tile is `disabled` with the note "Eres tú · no puedes"; the impostor sees the same screen as everyone else | Patterns/07 · SelfAndImpostor |
+| Tie in the impostor vote | Counts as escaped, like nobody voting | `VerdictCard outcome="escaped"` (the verdict never says "tie") | Patterns/08 · Tie |
 
 ## The impostor's estimate on the Reveal screen
 
