@@ -8,9 +8,8 @@
 
 ## Scoring
 
-- **Points for catching the impostor**: In the original game, when the impostor is caught every other player gets 2 extra points. Do we add it?
 - **Absolute distance on large numbers**: Distance is an absolute difference, so being 10 off weighs the same whether the solution is 3 or 300,000. Recorded as a known risk.
 
 ## Not discussed in the plenary
 
-`packages/ui/docs/open-decisions.md` lists more product rules nobody has decided yet: game capacity (Games), what the verdict shows (Impostor) and when the scoreboard appears (Scoring). Games has settled the minimum number of players and nobody leaving a game (in its glossary) and the game code format (in its spec).
+`packages/ui/docs/open-decisions.md` lists more product rules nobody has decided yet: game capacity (Games) and what the verdict shows (Impostor). Games has settled the minimum number of players and nobody leaving a game (in its glossary) and the game code format (in its spec); Scoring has settled when the scoreboard appears (in its glossary).
