@@ -262,4 +262,65 @@ describe("scoring routes", () => {
       error: { code: "unknown-code" },
     });
   });
+
+  it("returns reveal when round is revealed with estimates sorted by distance", async () => {
+    const { app, rounds } = createTestApp();
+
+    await app.request("/GAME/1/estimates", post(authAna, { value: 60 }));
+    await app.request("/GAME/1/estimates", post(authBob, { value: 50 }));
+
+    rounds.setRound("GAME", {
+      deadline: "2026-10-13T10:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 50,
+    });
+
+    const res = await app.request("/GAME/1/reveal", { headers: authAna });
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).toStrictEqual({
+      estimates: [
+        {
+          distance: 0,
+          id: "bob-id",
+          nickname: "Bob",
+          points: 5,
+          value: 50,
+        },
+        {
+          distance: 10,
+          id: "ana-id",
+          nickname: "Ana",
+          points: 0,
+          value: 60,
+        },
+      ],
+      solution: 50,
+    });
+  });
+
+  it("returns 409 round-not-revealed when round is still estimating", async () => {
+    const { app } = createTestApp();
+
+    const res = await app.request("/GAME/1/reveal", { headers: authAna });
+
+    expect(res.status).toBe(409);
+    await expect(res.json()).resolves.toMatchObject({
+      error: { code: "round-not-revealed" },
+    });
+  });
+
+  it("returns 404 round-not-found when round does not exist", async () => {
+    const { app } = createTestApp();
+
+    const res = await app.request("/GAME/99/reveal", { headers: authAna });
+
+    expect(res.status).toBe(404);
+    await expect(res.json()).resolves.toMatchObject({
+      error: { code: "round-not-found" },
+    });
+  });
 });

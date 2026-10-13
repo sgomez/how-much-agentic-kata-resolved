@@ -4,6 +4,7 @@ import { createService, createServiceClient } from "@hmk/kit";
 import type { ServiceApp } from "@hmk/kit";
 import { jwksUrl, urlOf } from "@hmk/kit/topology";
 
+import { GetRevealQuery } from "./application/get-reveal.query.ts";
 import { GetScoreboardQuery } from "./application/get-scoreboard.query.ts";
 import { ListEstimates } from "./application/list-estimates.query.ts";
 import { SendEstimate } from "./application/send-estimate.use-case.ts";
@@ -47,11 +48,19 @@ export const composeScoring = ({
     revealedRounds,
     rounds,
   });
+  const getReveal = new GetRevealQuery({
+    estimates,
+    games,
+    revealedRounds,
+    rounds,
+  });
 
   return createService({
     log,
     name: "scoring",
-    routes: [scoringRoutes({ getScoreboard, listEstimates, sendEstimate })],
+    routes: [
+      scoringRoutes({ getReveal, getScoreboard, listEstimates, sendEstimate }),
+    ],
     verifier,
   });
 };
