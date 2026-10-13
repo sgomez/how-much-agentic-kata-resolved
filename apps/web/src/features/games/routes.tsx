@@ -1,7 +1,7 @@
 import type { RouteObject } from "react-router";
 
+import { GamePage } from "./game-page.tsx";
 import { GamesHomePage } from "./home-page.tsx";
-import { LobbyPage } from "./lobby-page.tsx";
 
 /**
  * Screens of the games group. The shell mounts them behind the nickname sign-in.
@@ -11,5 +11,5 @@ import { LobbyPage } from "./lobby-page.tsx";
  */
 export const routes: RouteObject[] = [
   { path: "/games", element: <GamesHomePage /> },
-  { path: "/games/:code", element: <LobbyPage /> },
+  { path: "/games/:code", element: <GamePage /> },
 ];
