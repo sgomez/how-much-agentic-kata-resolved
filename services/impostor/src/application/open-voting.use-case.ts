@@ -1,6 +1,6 @@
 import type { Clock } from "../domain/ports/clock.port.ts";
-import { RoundNotFoundError } from "../domain/voting.errors.ts";
 import type { VotingRepository } from "../domain/voting.repository.ts";
+import { findVoting } from "./find-voting.ts";
 
 export interface OpenVotingInput {
   gameCode: string;
@@ -19,10 +19,7 @@ export class OpenVoting {
   }
 
   async execute({ gameCode, round, userId }: OpenVotingInput): Promise<void> {
-    const voting = await this.#votings.get(gameCode, round);
-    if (voting === undefined) {
-      throw new RoundNotFoundError(gameCode, round);
-    }
+    const voting = await findVoting(this.#votings, gameCode, round);
     voting.open(userId, this.#clock.now());
     await this.#votings.save(voting);
   }

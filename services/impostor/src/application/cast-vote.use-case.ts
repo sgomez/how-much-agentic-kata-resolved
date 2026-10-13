@@ -1,5 +1,5 @@
-import { RoundNotFoundError } from "../domain/voting.errors.ts";
 import type { VotingRepository } from "../domain/voting.repository.ts";
+import { findVoting } from "./find-voting.ts";
 
 export interface CastVoteInput {
   gameCode: string;
@@ -23,10 +23,7 @@ export class CastVote {
     userId,
     suspectNickname,
   }: CastVoteInput): Promise<void> {
-    const voting = await this.#votings.get(gameCode, round);
-    if (voting === undefined) {
-      throw new RoundNotFoundError(gameCode, round);
-    }
+    const voting = await findVoting(this.#votings, gameCode, round);
     voting.cast(userId, suspectNickname);
     await this.#votings.save(voting);
   }

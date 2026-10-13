@@ -1,6 +1,6 @@
 import type { Verdict } from "../domain/voting.aggregate.ts";
-import { RoundNotFoundError } from "../domain/voting.errors.ts";
 import type { VotingRepository } from "../domain/voting.repository.ts";
+import { findVoting } from "./find-voting.ts";
 
 export interface VerdictOutput {
   verdict: Verdict | null;
@@ -16,10 +16,7 @@ export class GetVerdict {
   }
 
   async execute(gameCode: string, round: number): Promise<VerdictOutput> {
-    const voting = await this.#votings.get(gameCode, round);
-    if (voting === undefined) {
-      throw new RoundNotFoundError(gameCode, round);
-    }
+    const voting = await findVoting(this.#votings, gameCode, round);
     return { impostorId: voting.impostorId, verdict: voting.verdict };
   }
 }

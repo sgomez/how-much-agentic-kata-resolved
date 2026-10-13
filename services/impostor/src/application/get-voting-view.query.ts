@@ -3,11 +3,9 @@ import type {
   Verdict,
   VotingStatus,
 } from "../domain/voting.aggregate.ts";
-import {
-  NotAPlayerError,
-  RoundNotFoundError,
-} from "../domain/voting.errors.ts";
+import { NotAPlayerError } from "../domain/voting.errors.ts";
 import type { VotingRepository } from "../domain/voting.repository.ts";
+import { findVoting } from "./find-voting.ts";
 
 export interface VotingViewOutput {
   voting: VotingStatus;
@@ -30,10 +28,7 @@ export class GetVotingView {
     round: number,
     userId: string
   ): Promise<VotingViewOutput> {
-    const voting = await this.#votings.get(gameCode, round);
-    if (voting === undefined) {
-      throw new RoundNotFoundError(gameCode, round);
-    }
+    const voting = await findVoting(this.#votings, gameCode, round);
     if (!voting.isCandidate(userId)) {
       throw new NotAPlayerError(userId);
     }

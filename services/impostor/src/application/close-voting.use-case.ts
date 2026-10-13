@@ -1,5 +1,5 @@
-import { RoundNotFoundError } from "../domain/voting.errors.ts";
 import type { VotingRepository } from "../domain/voting.repository.ts";
+import { findVoting } from "./find-voting.ts";
 
 export interface CloseVotingInput {
   gameCode: string;
@@ -16,10 +16,7 @@ export class CloseVoting {
   }
 
   async execute({ gameCode, round, userId }: CloseVotingInput): Promise<void> {
-    const voting = await this.#votings.get(gameCode, round);
-    if (voting === undefined) {
-      throw new RoundNotFoundError(gameCode, round);
-    }
+    const voting = await findVoting(this.#votings, gameCode, round);
     voting.close(userId);
     await this.#votings.save(voting);
   }
