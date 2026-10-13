@@ -1,6 +1,7 @@
 import { EmptyState, Screen, Spinner, Stack, TopBar } from "@hmk/ui";
 import type { ReactNode } from "react";
 
+import { LobbyScreen } from "./lobby-screen.tsx";
 import type { SceneScreen } from "./scene-director.ts";
 
 /** What every screen of another group receives: the game code and the bottom-action slot. */
@@ -34,12 +35,10 @@ const Loading = ({ code }: SceneScreenProps) => (
 
 // Screens of the other groups not exported yet. When a group exports its screen
 // from its feature `index.ts`, import it here and render it instead of the placeholder.
-// The lobby is a placeholder until #31 lands.
 const placeholders: Record<
-  Exclude<SceneScreen, "loading">,
+  Exclude<SceneScreen, "loading" | "lobby">,
   { title: string; group: string }
 > = {
-  lobby: { title: "Sala de espera", group: "games" },
   round: { title: "Ronda", group: "rounds" },
   reveal: { title: "Resultado de la ronda", group: "scoring" },
   voting: { title: "Votación", group: "impostor" },
@@ -51,9 +50,12 @@ const placeholders: Record<
 export const SceneScreenView = ({
   screen,
   ...props
-}: SceneScreenProps & { screen: SceneScreen }) =>
-  screen === "loading" ? (
-    <Loading {...props} />
-  ) : (
-    <Placeholder {...props} {...placeholders[screen]} />
-  );
+}: SceneScreenProps & { screen: SceneScreen }) => {
+  if (screen === "loading") {
+    return <Loading {...props} />;
+  }
+  if (screen === "lobby") {
+    return <LobbyScreen {...props} />;
+  }
+  return <Placeholder {...props} {...placeholders[screen]} />;
+};
