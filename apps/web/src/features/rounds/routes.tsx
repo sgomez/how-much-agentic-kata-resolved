@@ -1,13 +1,17 @@
 import type { RouteObject } from "react-router";
+import { useParams } from "react-router";
 
-import { PlaceholderPage } from "../../shell/placeholder-page.tsx";
+import { RoundScreen } from "./round-screen.tsx";
+
+const RoundRoute = () => {
+  const { code } = useParams();
+  return <RoundScreen gameCode={code ?? "DEMO"} />;
+};
 
 /**
- * Screens of the rounds group. Add your routes here; the shell mounts them behind
- * the nickname sign-in. Build screens only with @hmk/ui (see packages/ui/COMPONENTS.md;
- * the Patterns/ stories in `pnpm storybook` show each screen put together),
- * fetch views with `useView` and send actions with `api` from src/shell.
+ * Screens of the rounds group. Mounted behind the nickname sign-in.
  */
 export const routes: RouteObject[] = [
-  { path: "/round", element: <PlaceholderPage title="Ronda" group="rounds" /> },
+  { path: "/round", element: <RoundRoute /> },
+  { path: "/round/:code", element: <RoundRoute /> },
 ];
