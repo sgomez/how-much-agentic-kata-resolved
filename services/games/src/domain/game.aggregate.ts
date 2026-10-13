@@ -1,3 +1,5 @@
+import { GameAlreadyStartedError, NicknameTakenError } from "./game.errors.ts";
+
 export interface Player {
   readonly id: string;
   readonly nickname: string;
@@ -12,6 +14,8 @@ export interface Settings {
   readonly rounds: number;
   readonly impostorMode: boolean;
 }
+
+const normalise = (nickname: string): string => nickname.trim().toLowerCase();
 
 /**
  * One game, from its code to its final ranking.
@@ -45,6 +49,27 @@ export class Game {
   /** The round the game is on; null while it is in the lobby. */
   get currentRound(): number | null {
     return this.#currentRound;
+  }
+
+  /**
+   * Adds the player at the end of the line; a player already in is left alone.
+   * @throws {GameAlreadyStartedError} once the game has left the lobby
+   * @throws {NicknameTakenError} when another player has the nickname, ignoring case and spaces at either end
+   */
+  join(player: Player): void {
+    if (this.#phase !== "lobby") {
+      throw new GameAlreadyStartedError(this.code);
+    }
+    if (this.#players.some(({ id }) => id === player.id)) {
+      return;
+    }
+    const normalised = normalise(player.nickname);
+    if (
+      this.#players.some(({ nickname }) => normalise(nickname) === normalised)
+    ) {
+      throw new NicknameTakenError(player.nickname);
+    }
+    this.#players.push(player);
   }
 
   /** In the order they joined. */
