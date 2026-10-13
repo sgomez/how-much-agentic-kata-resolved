@@ -90,8 +90,7 @@ export type VerdictResponse = z.infer<typeof VerdictResponse>;
 /**
  * GET /:code/:n (phones every second in impostor mode, from the reveal on:
  * the games scene director picks screen 07 or 08, and screens 07 Voting and
- * 08 Verdict draw it). Everyone in the round sees the same view,
- * except `voters`.
+ * 08 Verdict draw it). Everyone in the round sees the same view.
  */
 export const VotingView = z
   .object({
@@ -99,8 +98,8 @@ export const VotingView = z
     /** Who can be voted for: the copy Rounds sent. */
     candidates: z.array(Candidate),
     /**
-     * Holds the caller's id once they have voted, nobody else's: the one who
-     * never votes is the impostor, so a longer list would give them away.
+     * Ids of the players who have already voted. Never who they voted for. The
+     * impostor never votes, so screens must not list who is missing.
      */
     voters: z.array(z.string().min(1)),
     /** Null until `voting` is `over`. */

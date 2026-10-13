@@ -151,10 +151,9 @@ describe("casting a vote", () => {
     expect(res.status).toBe(204);
     await expect(view("ana")).resolves.toMatchObject({
       impostorId: null,
-      voters: [],
+      voters: ["u3"],
       voting: "open",
     });
-    await expect(view("cleo")).resolves.toMatchObject({ voters: ["u3"] });
   });
 
   it("refuses the impostor's vote with 403 and keeps the voting open", async () => {
