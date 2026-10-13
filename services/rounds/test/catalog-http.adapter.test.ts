@@ -50,4 +50,21 @@ describe(CatalogHttpAdapter, () => {
 
     await expect(requests[0]?.json()).resolves.toStrictEqual({});
   });
+
+  it("throws DeckExhaustedError when catalog returns deck-exhausted", async () => {
+    const catalog = new CatalogHttpAdapter(
+      createServiceClient("http://catalog.internal", () =>
+        Promise.resolve(
+          Response.json(
+            { error: { code: "deck-exhausted", message: "Deck exhausted" } },
+            { status: 409 }
+          )
+        )
+      )
+    );
+
+    await expect(
+      runWithToken("ana-token", () => catalog.drawQuestion("game-1"))
+    ).rejects.toThrow("Deck exhausted for game game-1");
+  });
 });
