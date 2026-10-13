@@ -1,10 +1,16 @@
 import type { EstimatesRepository } from "../domain/estimates.repository.ts";
 import type { GamesPort } from "../domain/ports/games.port.ts";
+import type { ImpostorPort } from "../domain/ports/impostor.port.ts";
 import type { RoundsPort } from "../domain/ports/rounds.port.ts";
 import type { RevealedRoundsRepository } from "../domain/revealed-rounds.repository.ts";
-import { orderScoreboard, scoreRound } from "../domain/scoring-rules.ts";
+import {
+  orderScoreboard,
+  scoreRound,
+  scoreVerdict,
+} from "../domain/scoring-rules.ts";
 import type { ScoreboardEntry } from "../domain/scoring-rules.ts";
 import { NotAPlayer, RoundNotFound } from "../domain/scoring.errors.ts";
+import type { VerdictsRepository } from "../domain/verdicts.repository.ts";
 
 export interface ScoreboardResult {
   players: ScoreboardEntry[];
@@ -15,17 +21,23 @@ export class GetScoreboardQuery {
   readonly #rounds: RoundsPort;
   readonly #revealedRounds: RevealedRoundsRepository;
   readonly #estimates: EstimatesRepository;
+  readonly #impostor: ImpostorPort;
+  readonly #verdicts: VerdictsRepository;
 
   constructor(deps: {
     games: GamesPort;
     rounds: RoundsPort;
     revealedRounds: RevealedRoundsRepository;
     estimates: EstimatesRepository;
+    impostor: ImpostorPort;
+    verdicts: VerdictsRepository;
   }) {
     this.#games = deps.games;
     this.#rounds = deps.rounds;
     this.#revealedRounds = deps.revealedRounds;
     this.#estimates = deps.estimates;
+    this.#impostor = deps.impostor;
+    this.#verdicts = deps.verdicts;
   }
 
   async #getOrFetchSolution(
@@ -41,9 +53,9 @@ export class GetScoreboardQuery {
       const round = await this.#rounds.getRound(code, roundNumber);
       if (round.solution !== null) {
         await this.#revealedRounds.save(code, {
-          number: roundNumber,
-          min: round.min,
           max: round.max,
+          min: round.min,
+          number: roundNumber,
           solution: round.solution,
         });
         return round.solution;
@@ -54,6 +66,44 @@ export class GetScoreboardQuery {
         return "not-found";
       }
       throw error;
+    }
+  }
+
+  async #applyVerdictPoints(
+    code: string,
+    roundNumber: number,
+    gamePlayerIds: readonly string[],
+    accumulatedPoints: Map<string, number>
+  ): Promise<void> {
+    const cached = await this.#verdicts.get(code, roundNumber);
+    if (cached) {
+      const verdictPoints = scoreVerdict(
+        cached.verdict,
+        cached.impostorId,
+        gamePlayerIds
+      );
+      for (const [playerId, points] of Object.entries(verdictPoints)) {
+        const current = accumulatedPoints.get(playerId) ?? 0;
+        accumulatedPoints.set(playerId, current + points);
+      }
+      return;
+    }
+
+    const res = await this.#impostor.getVerdict(code, roundNumber);
+    if (res.verdict !== null && res.impostorId !== null) {
+      await this.#verdicts.save(code, roundNumber, {
+        impostorId: res.impostorId,
+        verdict: res.verdict,
+      });
+      const verdictPoints = scoreVerdict(
+        res.verdict,
+        res.impostorId,
+        gamePlayerIds
+      );
+      for (const [playerId, points] of Object.entries(verdictPoints)) {
+        const current = accumulatedPoints.get(playerId) ?? 0;
+        accumulatedPoints.set(playerId, current + points);
+      }
     }
   }
 
@@ -73,6 +123,8 @@ export class GetScoreboardQuery {
       accumulatedPoints.set(player.id, 0);
     }
 
+    const playerIds = game.players.map((p) => p.id);
+
     for (let n = 1; ; n += 1) {
       // oxlint-disable-next-line no-await-in-loop
       const solution = await this.#getOrFetchSolution(code, n);
@@ -90,6 +142,11 @@ export class GetScoreboardQuery {
         for (const s of scored) {
           const current = accumulatedPoints.get(s.playerId) ?? 0;
           accumulatedPoints.set(s.playerId, current + s.points);
+        }
+
+        if (game.impostorMode) {
+          // oxlint-disable-next-line no-await-in-loop
+          await this.#applyVerdictPoints(code, n, playerIds, accumulatedPoints);
         }
       }
     }

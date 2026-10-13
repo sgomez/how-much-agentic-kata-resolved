@@ -4,21 +4,35 @@ import { GetScoreboardQuery } from "../src/application/get-scoreboard.query.ts";
 import { RoundEstimates } from "../src/domain/round-estimates.aggregate.ts";
 import { MemoryEstimatesRepository } from "../src/infra/memory-estimates-repository.adapter.ts";
 import { MemoryGamesAdapter } from "../src/infra/memory-games.adapter.ts";
+import { MemoryImpostorAdapter } from "../src/infra/memory-impostor.adapter.ts";
 import { MemoryRevealedRoundsAdapter } from "../src/infra/memory-revealed-rounds.adapter.ts";
 import { MemoryRoundsAdapter } from "../src/infra/memory-rounds.adapter.ts";
+import { MemoryVerdictsAdapter } from "../src/infra/memory-verdicts.adapter.ts";
 
 const setup = () => {
   const games = new MemoryGamesAdapter();
   const rounds = new MemoryRoundsAdapter();
   const estimates = new MemoryEstimatesRepository();
   const revealedRounds = new MemoryRevealedRoundsAdapter();
+  const impostor = new MemoryImpostorAdapter();
+  const verdicts = new MemoryVerdictsAdapter();
   const query = new GetScoreboardQuery({
     estimates,
     games,
+    impostor,
     revealedRounds,
     rounds,
+    verdicts,
   });
-  return { estimates, games, query, revealedRounds, rounds };
+  return {
+    estimates,
+    games,
+    impostor,
+    query,
+    revealedRounds,
+    rounds,
+    verdicts,
+  };
 };
 
 describe(GetScoreboardQuery, () => {
@@ -196,6 +210,125 @@ describe(GetScoreboardQuery, () => {
 
     await expect(query.execute("UNKNOWN", "p1")).rejects.toThrow(
       "Game UNKNOWN not found"
+    );
+  });
+
+  it("in impostor mode adds 5 points to escaped impostor and 0 to others", async () => {
+    const { games, rounds, impostor, query } = setup();
+    games.setGame("GAME", {
+      impostorMode: true,
+      players: [
+        { id: "p1", nickname: "Ana" },
+        { id: "p2", nickname: "Luis" },
+        { id: "p3", nickname: "Eva" },
+      ],
+    });
+
+    rounds.setRound("GAME", {
+      deadline: "2026-10-13T10:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 50,
+    });
+
+    impostor.setVerdict("GAME", 1, {
+      impostorId: "p2",
+      verdict: "escaped",
+    });
+
+    const result = await query.execute("GAME", "p1");
+
+    expect(result.players).toStrictEqual([
+      { id: "p2", nickname: "Luis", points: 5 },
+      { id: "p1", nickname: "Ana", points: 0 },
+      { id: "p3", nickname: "Eva", points: 0 },
+    ]);
+  });
+
+  it("in impostor mode adds 2 catching bonus to other players and 0 to caught impostor", async () => {
+    const { games, rounds, impostor, query } = setup();
+    games.setGame("GAME", {
+      impostorMode: true,
+      players: [
+        { id: "p1", nickname: "Ana" },
+        { id: "p2", nickname: "Luis" },
+        { id: "p3", nickname: "Eva" },
+      ],
+    });
+
+    rounds.setRound("GAME", {
+      deadline: "2026-10-13T10:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 50,
+    });
+
+    impostor.setVerdict("GAME", 1, {
+      impostorId: "p2",
+      verdict: "caught",
+    });
+
+    const result = await query.execute("GAME", "p1");
+
+    expect(result.players).toStrictEqual([
+      { id: "p1", nickname: "Ana", points: 2 },
+      { id: "p3", nickname: "Eva", points: 2 },
+      { id: "p2", nickname: "Luis", points: 0 },
+    ]);
+  });
+
+  it("in impostor mode adds nothing when verdict is null (pending/open)", async () => {
+    const { games, rounds, impostor, query } = setup();
+    games.setGame("GAME", {
+      impostorMode: true,
+      players: [
+        { id: "p1", nickname: "Ana" },
+        { id: "p2", nickname: "Luis" },
+      ],
+    });
+
+    rounds.setRound("GAME", {
+      deadline: "2026-10-13T10:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 50,
+    });
+
+    impostor.setVerdict("GAME", 1, {
+      impostorId: null,
+      verdict: null,
+    });
+
+    const result = await query.execute("GAME", "p1");
+
+    expect(result.players).toStrictEqual([
+      { id: "p1", nickname: "Ana", points: 0 },
+      { id: "p2", nickname: "Luis", points: 0 },
+    ]);
+  });
+
+  it("in impostor mode fails if impostor port fails", async () => {
+    const { games, rounds, impostor, query } = setup();
+    games.setGame("GAME", {
+      impostorMode: true,
+      players: [{ id: "p1", nickname: "Ana" }],
+    });
+
+    rounds.setRound("GAME", {
+      deadline: "2026-10-13T10:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 50,
+    });
+
+    impostor.setError("GAME", 1, new Error("impostor unavailable"));
+
+    await expect(query.execute("GAME", "p1")).rejects.toThrow(
+      "impostor unavailable"
     );
   });
 });

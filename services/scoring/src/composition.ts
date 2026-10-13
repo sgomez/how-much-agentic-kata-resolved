@@ -9,21 +9,28 @@ import { GetScoreboardQuery } from "./application/get-scoreboard.query.ts";
 import { ListEstimates } from "./application/list-estimates.query.ts";
 import { SendEstimate } from "./application/send-estimate.use-case.ts";
 import type { GamesPort } from "./domain/ports/games.port.ts";
+import type { ImpostorPort } from "./domain/ports/impostor.port.ts";
 import type { RoundsPort } from "./domain/ports/rounds.port.ts";
 import type { RevealedRoundsRepository } from "./domain/revealed-rounds.repository.ts";
+import type { VerdictsRepository } from "./domain/verdicts.repository.ts";
 import { scoringRoutes } from "./http/scoring.routes.ts";
 import { GamesHttpAdapter } from "./infra/games-http.adapter.ts";
+import { ImpostorHttpAdapter } from "./infra/impostor-http.adapter.ts";
 import { MemoryEstimatesRepository } from "./infra/memory-estimates-repository.adapter.ts";
 import { MemoryGamesAdapter } from "./infra/memory-games.adapter.ts";
+import { MemoryImpostorAdapter } from "./infra/memory-impostor.adapter.ts";
 import { MemoryRevealedRoundsAdapter } from "./infra/memory-revealed-rounds.adapter.ts";
 import { MemoryRoundsAdapter } from "./infra/memory-rounds.adapter.ts";
+import { MemoryVerdictsAdapter } from "./infra/memory-verdicts.adapter.ts";
 import { RoundsHttpAdapter } from "./infra/rounds-http.adapter.ts";
 
 export interface ScoringDeps {
   verifier: TokenVerifier;
   rounds?: RoundsPort;
   games?: GamesPort;
+  impostor?: ImpostorPort;
   revealedRounds?: RevealedRoundsRepository;
+  verdicts?: VerdictsRepository;
   log?: boolean;
 }
 
@@ -36,7 +43,9 @@ export const composeScoring = ({
   verifier,
   rounds = new MemoryRoundsAdapter(),
   games = new MemoryGamesAdapter(),
+  impostor = new MemoryImpostorAdapter(),
   revealedRounds = new MemoryRevealedRoundsAdapter(),
+  verdicts = new MemoryVerdictsAdapter(),
   log,
 }: ScoringDeps): ServiceApp => {
   const estimates = new MemoryEstimatesRepository();
@@ -45,8 +54,10 @@ export const composeScoring = ({
   const getScoreboard = new GetScoreboardQuery({
     estimates,
     games,
+    impostor,
     revealedRounds,
     rounds,
+    verdicts,
   });
   const getReveal = new GetRevealQuery({
     estimates,
@@ -69,6 +80,7 @@ export const composeScoring = ({
 export const composeScoringFromEnv = (_env: NodeJS.ProcessEnv): ServiceApp =>
   composeScoring({
     games: new GamesHttpAdapter(createServiceClient(urlOf("games"))),
+    impostor: new ImpostorHttpAdapter(createServiceClient(urlOf("impostor"))),
     log: true,
     rounds: new RoundsHttpAdapter(createServiceClient(urlOf("rounds"))),
     verifier: createJwksVerifier(jwksUrl()),
