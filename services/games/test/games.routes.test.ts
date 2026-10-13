@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { composeGames } from "../src/composition.ts";
 import { FixedCodeGenerator } from "../src/infra/fixed-code-generator.adapter.ts";
+import { MemoryImpostor } from "../src/infra/memory-impostor.adapter.ts";
 import { MemoryRounds } from "../src/infra/memory-rounds.adapter.ts";
 
 const verifier = createStaticVerifier({
@@ -21,6 +22,7 @@ const asBen = { authorization: "Bearer ben-token" };
 const games = (codes: readonly string[] = ["KQZT"]) =>
   composeGames({
     codes: new FixedCodeGenerator(codes),
+    impostor: new MemoryImpostor(),
     rounds: new MemoryRounds(),
     verifier,
   });
@@ -186,6 +188,22 @@ describe("games routes", () => {
       await expect(res.json()).resolves.toMatchObject({
         error: { code: "unknown-code" },
       });
+    });
+
+    it("answers 409 game-already-started once the game has started, and adds nobody", async () => {
+      const app = await lobby();
+      await join(app, "KQZT");
+      await app.request("/KQZT/start", { headers: auth, method: "POST" });
+
+      const res = await join(app, "KQZT", {
+        authorization: "Bearer ben-spaced-token",
+      });
+
+      expect(res.status).toBe(409);
+      await expect(res.json()).resolves.toMatchObject({
+        error: { code: "game-already-started" },
+      });
+      await expect(nicknames(app)).resolves.toStrictEqual(["Ana", "Ben"]);
     });
 
     it("answers 409 nickname-taken to another player with the same nickname, ignoring case and spaces", async () => {

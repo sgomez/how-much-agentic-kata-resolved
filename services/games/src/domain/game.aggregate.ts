@@ -1,8 +1,10 @@
 import {
   GameAlreadyStartedError,
+  GameNotStartedError,
   NicknameTakenError,
   NotEnoughPlayersError,
   NotTheHostError,
+  WrongRoundError,
 } from "./game.errors.ts";
 
 export interface Player {
@@ -91,6 +93,45 @@ export class Game {
     this.assertCanStart(playerId);
     this.#phase = "playing";
     this.#currentRound = 1;
+  }
+
+  /**
+   * Whether the host leaving `round` changes anything: false once the game has
+   * moved on from it or finished (a double click, a retry).
+   * @throws {NotTheHostError} when `playerId` is not the host.
+   * @throws {GameNotStartedError} in the lobby.
+   * @throws {WrongRoundError} when `round` is ahead of the current round.
+   */
+  canLeave(playerId: string, round: number): boolean {
+    if (playerId !== this.host.id) {
+      throw new NotTheHostError();
+    }
+    if (this.#currentRound === null) {
+      throw new GameNotStartedError(this.code);
+    }
+    if (round > this.#currentRound) {
+      throw new WrongRoundError(round);
+    }
+    return this.#phase === "playing" && round === this.#currentRound;
+  }
+
+  /** The game plays the round after `round`, unless it has already moved on from it. */
+  moveOnFrom(round: number): void {
+    if (this.#phase === "playing" && this.#currentRound === round) {
+      this.#currentRound = round + 1;
+    }
+  }
+
+  /** The game ends on the round it is on, unless it has already moved on from `round`. */
+  finishAfter(round: number): void {
+    if (this.#phase === "playing" && this.#currentRound === round) {
+      this.#phase = "finished";
+    }
+  }
+
+  /** True when `round` is the last one the host asked for. */
+  isLastRound(round: number): boolean {
+    return round >= this.settings.rounds;
   }
 
   get phase(): Phase {

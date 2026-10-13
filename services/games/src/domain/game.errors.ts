@@ -57,3 +57,43 @@ export class NicknameTakenError extends Error {
     this.name = "NicknameTakenError";
   }
 }
+
+export class GameNotStartedError extends Error {
+  readonly kind = "conflict";
+  readonly code = "game-not-started";
+
+  constructor(code: string) {
+    super(`Game ${code} is still in the lobby`);
+    this.name = "GameNotStartedError";
+  }
+}
+
+export class WrongRoundError extends Error {
+  readonly kind = "conflict";
+  readonly code = "wrong-round";
+
+  constructor(round: number) {
+    super(`The game has not reached round ${round}`);
+    this.name = "WrongRoundError";
+  }
+}
+
+export class RoundNotRevealedError extends Error {
+  readonly kind = "conflict";
+  readonly code = "round-not-revealed";
+
+  constructor(round: number) {
+    super(`Round ${round} is still being estimated`);
+    this.name = "RoundNotRevealedError";
+  }
+}
+
+export class VotingNotOverError extends Error {
+  readonly kind = "conflict";
+  readonly code = "voting-not-over";
+
+  constructor(round: number) {
+    super(`The voting of round ${round} is not over`);
+    this.name = "VotingNotOverError";
+  }
+}

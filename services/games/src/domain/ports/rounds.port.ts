@@ -1,4 +1,7 @@
-import type { CreateRoundRequest } from "@hmk/contracts/rounds";
+import type {
+  CreateRoundRequest,
+  RoundInternalResponse,
+} from "@hmk/contracts/rounds";
 
 /** The rounds service, as games needs it. */
 export interface RoundsPort {
@@ -13,4 +16,10 @@ export interface RoundsPort {
     number: number,
     request: CreateRoundRequest
   ) => Promise<void>;
+
+  /**
+   * Reads round `number`: `solution` is null until it is revealed.
+   * A round rounds does not know is a failure, thrown as it comes.
+   */
+  getRound: (code: string, number: number) => Promise<RoundInternalResponse>;
 }

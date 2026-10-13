@@ -70,4 +70,34 @@ describe("rounds HTTP adapter", () => {
       adapter.createRound("KQZT", 1, request)
     ).rejects.not.toBeInstanceOf(DeckExhaustedError);
   });
+
+  it("reads a round as the host, forwarding the host's token", async () => {
+    const calls: { url: string; auth: string | null }[] = [];
+    const round = {
+      deadline: "2030-01-01T00:00:00.000Z",
+      max: 100,
+      min: 0,
+      number: 2,
+      solution: null,
+    };
+    const fetchFn: typeof fetch = (input, init) => {
+      calls.push({
+        auth: new Headers(init?.headers).get("authorization"),
+        url: String(input),
+      });
+      return Promise.resolve(json(round, 200));
+    };
+    const adapter = new RoundsHttpAdapter(
+      createServiceClient("http://rounds.test", fetchFn)
+    );
+
+    const read = await runWithToken("host-token", () =>
+      adapter.getRound("KQZT", 2)
+    );
+
+    expect(read).toStrictEqual(round);
+    expect(calls).toStrictEqual([
+      { auth: "Bearer host-token", url: "http://rounds.test/internal/KQZT/2" },
+    ]);
+  });
 });
