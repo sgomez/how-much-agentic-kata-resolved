@@ -6,6 +6,7 @@ import {
   Avatar,
   BottomActionBar,
   Button,
+  CodeInput,
   Heading,
   Screen,
   Stack,
@@ -18,8 +19,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { api } from "../../shell/api.ts";
+import { api, ApiError } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
+import { JoinErrorScreen } from "./join-error-screen.tsx";
 
 /** The settings a game gets when the host only taps "Crear partida". */
 const DEFAULT_ROUND_SECONDS = 30;
@@ -30,6 +32,7 @@ export const GamesHomePage = () => {
   const { data: session } = authClient.useSession();
   const player = session?.user;
   const [impostorMode, setImpostorMode] = useState(false);
+  const [joinCode, setJoinCode] = useState("");
   const create = useMutation({
     mutationFn: () => {
       const body: CreateGameRequest = {
@@ -40,6 +43,16 @@ export const GamesHomePage = () => {
     },
     onSuccess: ({ code }) => navigate(`/games/${code}`),
   });
+  const join = useMutation({
+    mutationFn: (code: string) =>
+      api<undefined>(`/games/${code}/players`, { method: "POST" }),
+    onSuccess: (_, code) => navigate(`/games/${code}`),
+  });
+  if (join.error instanceof ApiError) {
+    return (
+      <JoinErrorScreen code={join.error.code} onBack={() => join.reset()} />
+    );
+  }
   return (
     <Screen
       top={
@@ -82,6 +95,22 @@ export const GamesHomePage = () => {
             ¡Hola{player === undefined ? "" : `, ${player.name}`}!
           </Heading>
           <Text tone="muted">Crea tu partida y comparte el código.</Text>
+        </Stack>
+        <Stack gap={3}>
+          <CodeInput
+            value={joinCode}
+            onChange={setJoinCode}
+            onComplete={(code) => join.mutate(code)}
+          />
+          <Button
+            variant="secondary"
+            fullWidth
+            disabled={joinCode.length < 4}
+            loading={join.isPending}
+            onClick={() => join.mutate(joinCode)}
+          >
+            Unirse
+          </Button>
         </Stack>
         <Switch
           label="Modo impostor"
