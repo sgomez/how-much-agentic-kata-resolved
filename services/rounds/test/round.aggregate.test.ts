@@ -125,6 +125,70 @@ describe("Round aggregate", () => {
     expect(() => round.viewFor("intruder", baseTime)).toThrow(NotAPlayerError);
   });
 
+  it("returns internal view during estimating phase with hidden solution", () => {
+    const round = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: false,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    });
+
+    const internalView = round.internalViewFor("p1", baseTime);
+
+    expect(internalView).toStrictEqual({
+      deadline: "2026-01-01T12:00:30.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: null,
+    });
+  });
+
+  it("returns internal view during revealed phase with solution", () => {
+    const round = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: false,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    });
+
+    const atDeadline = new Date("2026-01-01T12:00:30.000Z");
+    const internalView = round.internalViewFor("p2", atDeadline);
+
+    expect(internalView).toStrictEqual({
+      deadline: "2026-01-01T12:00:30.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: 42,
+    });
+  });
+
+  it("rejects internal view request for a non-player", () => {
+    const round = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: false,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    });
+
+    expect(() => round.internalViewFor("intruder", baseTime)).toThrow(
+      NotAPlayerError
+    );
+  });
+
   it("in impostor mode, round is reserved until completed with an impostor", () => {
     const reserved = Round.create({
       gameCode: "GAME",

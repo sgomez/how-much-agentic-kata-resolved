@@ -1,5 +1,6 @@
 import type { Question } from "@hmk/contracts/catalog";
 import type {
+  RoundInternalResponse,
   RoundPhase,
   RoundPlayer,
   RoundViewResponse,
@@ -157,6 +158,22 @@ export class Round {
       serverNow: now.toISOString(),
       solution: isRevealed ? this.#question.solution : null,
       unit: this.#question.unit,
+    };
+  }
+
+  internalViewFor(playerId: string, now: Date): RoundInternalResponse {
+    if (!this.isPlayer(playerId)) {
+      throw new NotAPlayerError(playerId);
+    }
+
+    const isRevealed = this.phase(now) === "revealed";
+
+    return {
+      deadline: this.#deadline.toISOString(),
+      max: this.#question.max,
+      min: this.#question.min,
+      number: this.#number,
+      solution: isRevealed ? this.#question.solution : null,
     };
   }
 }
