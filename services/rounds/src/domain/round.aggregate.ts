@@ -107,6 +107,21 @@ export class Round {
     return this.#impostorId;
   }
 
+  complete(impostorId: string): Round {
+    return new Round({
+      completed: true,
+      deadline: this.#deadline,
+      gameCode: this.#gameCode,
+      hostId: this.#hostId,
+      impostorId,
+      impostorMode: this.#impostorMode,
+      number: this.#number,
+      players: this.#players,
+      question: this.#question,
+      roundSeconds: this.#roundSeconds,
+    });
+  }
+
   isComplete(): boolean {
     return this.#completed;
   }
@@ -128,15 +143,16 @@ export class Round {
 
     const currentPhase = this.phase(now);
     const isRevealed = currentPhase === "revealed";
+    const isImpostor = this.#impostorMode && playerId === this.#impostorId;
 
     return {
       deadline: this.#deadline.toISOString(),
-      isImpostor: false,
+      isImpostor,
       max: this.#question.max,
       min: this.#question.min,
       number: this.#number,
       phase: currentPhase,
-      question: this.#question.text,
+      question: isImpostor ? null : this.#question.text,
       roundSeconds: this.#roundSeconds,
       serverNow: now.toISOString(),
       solution: isRevealed ? this.#question.solution : null,

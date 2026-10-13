@@ -124,4 +124,62 @@ describe("Round aggregate", () => {
 
     expect(() => round.viewFor("intruder", baseTime)).toThrow(NotAPlayerError);
   });
+
+  it("in impostor mode, round is reserved until completed with an impostor", () => {
+    const reserved = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: true,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    });
+
+    expect(reserved.isComplete()).toBeFalsy();
+    expect(reserved.impostorId).toBeNull();
+
+    const completed = reserved.complete("p2");
+    expect(completed.isComplete()).toBeTruthy();
+    expect(completed.impostorId).toBe("p2");
+  });
+
+  it("hides question and sets isImpostor: true for the impostor", () => {
+    const round = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: true,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    }).complete("p2");
+
+    const impostorView = round.viewFor("p2", baseTime);
+    expect(impostorView.isImpostor).toBeTruthy();
+    expect(impostorView.question).toBeNull();
+    expect(impostorView.unit).toBe("metros");
+    expect("impostorId" in impostorView).toBeFalsy();
+  });
+
+  it("shows question and sets isImpostor: false for innocent players", () => {
+    const round = Round.create({
+      gameCode: "GAME",
+      hostId: "p1",
+      impostorMode: true,
+      now: baseTime,
+      number: 1,
+      players,
+      question,
+      roundSeconds: 30,
+    }).complete("p2");
+
+    const innocentView = round.viewFor("p1", baseTime);
+    expect(innocentView.isImpostor).toBeFalsy();
+    expect(innocentView.question).toBe("¿Cuántos metros mide la torre?");
+    expect(innocentView.unit).toBe("metros");
+    expect("impostorId" in innocentView).toBeFalsy();
+  });
 });

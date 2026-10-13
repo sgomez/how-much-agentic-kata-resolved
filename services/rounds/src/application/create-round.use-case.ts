@@ -2,6 +2,7 @@ import type { RoundPlayer } from "@hmk/contracts/rounds";
 
 import type { CatalogPort } from "../domain/ports/catalog.port.ts";
 import type { ClockPort } from "../domain/ports/clock.port.ts";
+import type { ImpostorPort } from "../domain/ports/impostor.port.ts";
 import { Round } from "../domain/round.aggregate.ts";
 import { WrongRoundNumberError } from "../domain/round.errors.ts";
 import type { RoundRepository } from "../domain/round.repository.ts";
@@ -25,15 +26,18 @@ export class CreateRound {
   readonly #rounds: RoundRepository;
   readonly #catalog: CatalogPort;
   readonly #clock: ClockPort;
+  readonly #impostor?: ImpostorPort;
 
   constructor(deps: {
     rounds: RoundRepository;
     catalog: CatalogPort;
     clock: ClockPort;
+    impostor?: ImpostorPort;
   }) {
     this.#rounds = deps.rounds;
     this.#catalog = deps.catalog;
     this.#clock = deps.clock;
+    this.#impostor = deps.impostor;
   }
 
   async execute(input: CreateRoundInput): Promise<CreateRoundOutput> {
@@ -46,8 +50,29 @@ export class CreateRound {
       return { alreadyExisted: true, number: input.roundNumber };
     }
 
+    if (existing && !existing.isComplete()) {
+      if (!this.#impostor) {
+        throw new Error("Impostor port is required in impostor mode");
+      }
+      const impostorId = await this.#impostor.chooseImpostor(
+        input.gameCode,
+        input.roundNumber,
+        input.players,
+        input.hostId,
+        existing.deadline
+      );
+      const completed = existing.complete(impostorId);
+      await this.#rounds.save(completed);
+      return { alreadyExisted: false, number: input.roundNumber };
+    }
+
     const lastRound = await this.#rounds.findLastByGame(input.gameCode);
-    const expectedNumber = lastRound ? lastRound.number + 1 : 1;
+    let expectedNumber = 1;
+    if (lastRound) {
+      expectedNumber = lastRound.isComplete()
+        ? lastRound.number + 1
+        : lastRound.number;
+    }
     if (input.roundNumber !== expectedNumber) {
       throw new WrongRoundNumberError(expectedNumber, input.roundNumber);
     }
@@ -68,6 +93,28 @@ export class CreateRound {
       question,
       roundSeconds: input.roundSeconds,
     });
+
+    if (input.impostorMode) {
+      if (!this.#impostor) {
+        throw new Error("Impostor port is required in impostor mode");
+      }
+      // Step 2: Reserve round with question and deadline
+      await this.#rounds.save(round);
+
+      // Step 3: Ask Impostor
+      const impostorId = await this.#impostor.chooseImpostor(
+        input.gameCode,
+        input.roundNumber,
+        input.players,
+        input.hostId,
+        round.deadline
+      );
+
+      // Step 4: Complete round
+      const completed = round.complete(impostorId);
+      await this.#rounds.save(completed);
+      return { alreadyExisted: false, number: input.roundNumber };
+    }
 
     await this.#rounds.save(round);
 

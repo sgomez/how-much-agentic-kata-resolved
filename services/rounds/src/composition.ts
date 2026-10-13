@@ -8,14 +8,18 @@ import { CreateRound } from "./application/create-round.use-case.ts";
 import { GetRoundView } from "./application/get-round-view.query.ts";
 import type { CatalogPort } from "./domain/ports/catalog.port.ts";
 import type { ClockPort } from "./domain/ports/clock.port.ts";
+import type { ImpostorPort } from "./domain/ports/impostor.port.ts";
 import { roundsRoutes } from "./http/rounds.routes.ts";
 import { CatalogHttpAdapter } from "./infra/catalog-http.adapter.ts";
+import { ImpostorHttpAdapter } from "./infra/impostor-http.adapter.ts";
+import { MemoryImpostorAdapter } from "./infra/memory-impostor.adapter.ts";
 import { MemoryRoundRepository } from "./infra/memory-round-repository.adapter.ts";
 import { SystemClock } from "./infra/system-clock.adapter.ts";
 
 export interface RoundsDeps {
   verifier: TokenVerifier;
   catalog: CatalogPort;
+  impostor?: ImpostorPort;
   clock?: ClockPort;
   log?: boolean;
 }
@@ -28,11 +32,12 @@ export interface RoundsDeps {
 export const composeRounds = ({
   verifier,
   catalog,
+  impostor = new MemoryImpostorAdapter(),
   clock = new SystemClock(),
   log,
 }: RoundsDeps): ServiceApp => {
   const rounds = new MemoryRoundRepository();
-  const createRound = new CreateRound({ catalog, clock, rounds });
+  const createRound = new CreateRound({ catalog, clock, impostor, rounds });
   const getRoundView = new GetRoundView({ clock, rounds });
 
   return createService({
@@ -48,6 +53,7 @@ export const composeRoundsFromEnv = (_env: NodeJS.ProcessEnv): ServiceApp =>
   composeRounds({
     catalog: new CatalogHttpAdapter(createServiceClient(urlOf("catalog"))),
     clock: new SystemClock(),
+    impostor: new ImpostorHttpAdapter(createServiceClient(urlOf("impostor"))),
     log: true,
     verifier: createJwksVerifier(jwksUrl()),
   });
