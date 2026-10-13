@@ -8,7 +8,7 @@ Impostor mode: who the impostor of each round is, the vote to find them, and its
 
 **Candidate**: A player who takes part in a round's voting: every player of the round when it was created, the host and the impostor included. Only candidates vote, and only candidates can be voted for. _Avoid_: Participant, voter
 
-**Voting**: The moment after a round is revealed when candidates vote for who they think the impostor was. It is pending until the host opens it, which the host can only do once the round is revealed. It is over when every candidate has voted or when the host closes it, and it never opens again. _Avoid_: Poll, accusation, discussion
+**Voting**: The moment after a round is revealed, solution included, when candidates vote for who they think the impostor was. It is pending until the host opens it, which the host can only do once the round is revealed. It is over when every candidate has voted or when the host closes it, and it never opens again. _Avoid_: Poll, accusation, discussion
 
 **Vote**: The candidate someone points at as the impostor. Every candidate votes, the impostor included; nobody votes for themselves, and a vote is final. _Avoid_: Accusation, suspicion, guess
 

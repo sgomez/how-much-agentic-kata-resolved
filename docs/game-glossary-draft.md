@@ -19,10 +19,6 @@
 - **Points for catching the impostor**: In the original game, when the impostor is caught every other player gets 2 extra points. Do we add it?
 - **Absolute distance on large numbers**: Distance is an absolute difference, so being 10 off weighs the same whether the solution is 3 or 300,000. Recorded as a known risk.
 
-## Impostor
-
-- **Hiding the solution until after the vote**: In the original game, impostor rounds reveal the estimates without the solution, and the solution only after the vote. For now the solution is shown at the reveal, like in any round. Do we hide it? Impostor decides once Scoring says what it would cost their reveal (questionnaire sent after the contract fair).
-
 ## Not discussed in the plenary
 
 `packages/ui/docs/open-decisions.md` lists more product rules nobody has decided yet: the minimum number of players (Games), game capacity (Games), the game code format (Games), what the verdict shows (Impostor) and when the scoreboard appears (Scoring).
