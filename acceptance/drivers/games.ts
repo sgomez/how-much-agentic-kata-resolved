@@ -1,5 +1,6 @@
 import { CreateGameResponse, GameView } from "@hmk/contracts/games";
 import type { CreateGameRequest } from "@hmk/contracts/games";
+import { z } from "zod";
 
 import type { GamesDriver } from "../dsl/drivers.ts";
 import { pendingIn } from "../dsl/pending-contract.ts";
@@ -30,5 +31,7 @@ export const gamesDriver: GamesDriver = {
     return view.players.map((p) => p.nickname);
   },
   nextRound: () => pending("GamesDriver.nextRound"),
-  startGame: () => pending("GamesDriver.startGame"),
+  startGame: async (host, code) => {
+    await host.http.post(`/games/${code}/start`, undefined, z.unknown());
+  },
 };
