@@ -20,8 +20,12 @@ export const GamesErrorCode = z.enum([
   "not-the-host",
   /** 409: moving to the next round while the game is still in the lobby. */
   "game-not-started",
-  /** 409: moving to the next round of a finished game. */
-  "game-finished",
+  /** 409: starting with fewer than two players, or fewer than three in impostor mode. */
+  "not-enough-players",
+  /** 409: moving on from a round the game has not reached yet. */
+  "wrong-round",
+  /** 409: moving on while the current round is still being estimated. */
+  "round-not-revealed",
   /** 409: no question left for round 1; the game stays in the lobby. */
   "deck-exhausted",
   /** 409: impostor mode, and the voting of the current round is not over yet. */
@@ -43,6 +47,17 @@ export type GamePlayers = z.infer<typeof GamePlayers>;
 export const GamePhase = z.enum(["lobby", "playing", "finished"]);
 export type GamePhase = z.infer<typeof GamePhase>;
 
+/** The settings the host chose when creating the game. They never change. */
+export const GameSettings = z.object({
+  /** Packs to draw questions from; empty means every pack. */
+  packs: z.array(z.string().min(1)),
+  roundSeconds: z.number().int().positive(),
+  /** Number of rounds. */
+  rounds: z.number().int().positive(),
+  impostorMode: z.boolean(),
+});
+export type GameSettings = z.infer<typeof GameSettings>;
+
 /**
  * POST /api/games
  * The host creates a game with its settings. 400 `invalid-request` on a bad body.
@@ -57,12 +72,12 @@ export const CreateGameRequest = z.object({
   impostorMode: z.boolean(),
 });
 export type CreateGameRequest = z.input<typeof CreateGameRequest>;
-// Open: what happens with a pack the catalog does not have (rejected here, or
-// a 422 `no-questions-in-packs` when the host starts)?
-// Open: the code format (packages/ui/docs/open-decisions.md).
+// The host picks packs from the catalog's list (screen 02), so an unknown pack
+// only comes in a hand-made request: starting that game fails with a 500.
 
 /** 201 */
 export const CreateGameResponse = z.object({
+  /** Four upper-case letters, never I or O. Codes are upper-cased before lookup. */
   code: z.string().min(1),
 });
 export type CreateGameResponse = z.infer<typeof CreateGameResponse>;
@@ -83,45 +98,64 @@ export const GameView = z.object({
   code: z.string().min(1),
   hostId: z.string().min(1),
   phase: GamePhase,
-  /** The round the game is on: the `n` for rounds, scoring and impostor. Null in the lobby. */
+  /**
+   * The round the game is on: the `n` for rounds, scoring and impostor.
+   * Null in the lobby; a finished game keeps the last round it played.
+   */
   currentRound: z.number().int().positive().nullable(),
+  /** Fixed once the game starts: nobody joins late and nobody leaves. */
   players: GamePlayers,
+  settings: GameSettings,
 });
 export type GameView = z.infer<typeof GameView>;
-// Open: whether the view carries the settings (number of rounds, impostor mode).
-// Open: whether a player who leaves mid-game stays in `players`.
 
 /**
  * POST /api/games/:code/start
  * The host starts the game. Games asks rounds (`rounds POST /internal/:code/1`)
  * and only moves to `playing`, with `currentRound` 1, once round 1 exists.
+ * It sends the settings' packs, and leaves `packs` out when they are empty.
  * No request body. 204.
  * Errors: 403 `not-the-host`, 404 `unknown-code`, 409 `game-already-started`,
- * 409 `deck-exhausted` (the game stays in the lobby), 502 if rounds does not answer.
+ * 409 `not-enough-players` (fewer than two, or three in impostor mode; rounds
+ * is not asked), 409 `deck-exhausted` (the game stays in the lobby), 500 if
+ * rounds fails.
  */
-// Open: minimum number of players, in impostor mode or always (proposal: 3 in impostor mode).
 
 /**
  * POST /api/games/:code/next
- * The host moves the game on, also after the last round. In impostor mode,
- * games first asks impostor (`impostor GET /internal/:code/:n/verdict`) and
- * only moves on once the voting of the current round is over; a 404 there
- * means the round has no impostor. Then it asks rounds for round n + 1 and
- * raises `currentRound` once it exists. After the last round, or when rounds
- * answers 409 `deck-exhausted`, the game becomes `finished`.
- * No request body. 204.
+ * The host moves the game on from `round`, also after the last round.
+ * If the game has already moved on from `round` (a higher current round, or
+ * finished), it answers 204 and changes nothing: a double click or a retry
+ * never skips a round.
+ * Otherwise games first asks rounds (`rounds GET /internal/:code/:n`) and only
+ * moves on once the round is revealed (`solution` not null). In impostor mode
+ * it then asks impostor (`impostor GET /internal/:code/:n/verdict`) and only
+ * moves on once the verdict is not null; every round of an impostor game has
+ * an impostor, so a 404 there is a failure, not a pass. Then it asks rounds
+ * for round n + 1 and raises `currentRound` once it exists. After the last
+ * round, or when rounds answers 409 `deck-exhausted`, the game becomes `finished`.
+ * 204.
  * Errors: 403 `not-the-host`, 404 `unknown-code`, 409 `game-not-started`,
- * 409 `game-finished`, 409 `voting-not-over`, 502 if rounds or impostor do not answer.
+ * 409 `wrong-round` (`round` is ahead of the current round),
+ * 409 `round-not-revealed`, 409 `voting-not-over`, 500 if rounds or impostor
+ * fail or impostor has no verdict for the round (404).
  */
+export const NextRoundRequest = z.object({
+  /** The round the host is moving on from: the `currentRound` their phone sees. */
+  round: z.number().int().positive(),
+});
+export type NextRoundRequest = z.infer<typeof NextRoundRequest>;
 
 /**
  * GET /internal/:code/players (service to service: scoring)
  * Every player in the game, whether they estimated or not, in the order they
- * joined. Error: 404 `unknown-code`.
+ * joined, and whether the game is in impostor mode, so scoring only asks for
+ * verdicts when there are any. Error: 404 `unknown-code`.
  */
 export const ListPlayersResponse = z.object({
   players: GamePlayers,
+  impostorMode: z.boolean(),
 });
 export type ListPlayersResponse = z.infer<typeof ListPlayersResponse>;
-// Open: how long a finished game exists. If it is deleted, the final
-// scoreboard gets a 404 from here.
+// Games are never deleted while the service runs, so the final scoreboard
+// always finds the players.
