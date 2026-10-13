@@ -6,6 +6,8 @@ import { jwksUrl, urlOf } from "@hmk/kit/topology";
 
 import { CreateGame } from "./application/create-game.use-case.ts";
 import { GetGameView } from "./application/game-view.query.ts";
+import { JoinGame } from "./application/join-game.use-case.ts";
+import { ListPlayers } from "./application/list-players.query.ts";
 import { StartGame } from "./application/start-game.use-case.ts";
 import type { GameRepository } from "./domain/game.repository.ts";
 import type { CodeGenerator } from "./domain/ports/code-generator.port.ts";
@@ -34,11 +36,15 @@ export const composeGames = ({
 }: GamesDeps): ServiceApp => {
   const createGame = new CreateGame({ codes, games });
   const gameView = new GetGameView({ games });
+  const joinGame = new JoinGame({ games });
+  const listPlayers = new ListPlayers({ games });
   const startGame = new StartGame({ games, rounds });
   return createService({
     log,
     name: "games",
-    routes: [gamesRoutes({ createGame, gameView, startGame })],
+    routes: [
+      gamesRoutes({ createGame, gameView, joinGame, listPlayers, startGame }),
+    ],
     verifier,
   });
 };

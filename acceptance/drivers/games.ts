@@ -13,7 +13,19 @@ export const gamesDriver: GamesDriver = {
     const request: CreateGameRequest = { impostorMode: impostor, roundSeconds };
     return host.http.post("/games", request, CreateGameResponse);
   },
-  join: () => pending("GamesDriver.join"),
+  join: async (player, code) => {
+    const { status } = await player.http.request(
+      "POST",
+      `/games/${code}/players`
+    );
+    if (status === 404) {
+      return "unknown-code";
+    }
+    if (status < 200 || status >= 300) {
+      throw new Error(`Joining game ${code} answered ${status}`);
+    }
+    return "joined";
+  },
   lobby: async (player, code) => {
     const view = await player.http.get(`/games/${code}`, GameView);
     return view.players.map((p) => p.nickname);
