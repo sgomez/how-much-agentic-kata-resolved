@@ -164,16 +164,18 @@ describe(RoundScreen, () => {
     expect(html).toContain("disabled");
   });
 
-  it("renders disabled time up button when round is revealed", () => {
+  it("disables ruler and shows time-up hint when deadline has passed", () => {
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(["games", "ABCD"], mockGame);
     queryClient.setQueryData(["rounds", "ABCD", 1], {
       ...mockRound,
       phase: "revealed",
+      solution: 21_196,
     });
 
     const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
 
+    expect(html).toContain('aria-disabled="true"');
     expect(html).toContain("Se acabó el tiempo");
     expect(html).toContain("disabled");
   });

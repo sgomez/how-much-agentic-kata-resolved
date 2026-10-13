@@ -103,12 +103,14 @@ export const RoundScreen = ({
       </Screen>
     );
   }
-
   const sentValue = estimates?.myEstimate ?? null;
   const isSent = sentValue !== null;
   const currentValue = selected ?? sentValue;
   const changed = isSent && currentValue !== null && currentValue !== sentValue;
-  const timeUp = roundView.phase === "revealed";
+  const isTimeUp =
+    roundView.phase === "revealed" ||
+    new Date(roundView.serverNow).getTime() >=
+      new Date(roundView.deadline).getTime();
 
   const handleSend = async () => {
     if (
@@ -134,8 +136,8 @@ export const RoundScreen = ({
   };
 
   const roundHint = () => {
-    if (timeUp) {
-      return;
+    if (isTimeUp) {
+      return "Se acabó el tiempo";
     }
     if (currentValue === null) {
       return "Elige un valor en la regla para enviar";
@@ -154,7 +156,7 @@ export const RoundScreen = ({
   }));
 
   let action: ReactNode;
-  if (timeUp) {
+  if (isTimeUp) {
     action = (
       <Button size="lg" fullWidth disabled icon="clock">
         Se acabó el tiempo
@@ -226,7 +228,7 @@ export const RoundScreen = ({
           value={currentValue}
           onChange={setSelected}
           sentValue={sentValue}
-          disabled={timeUp}
+          disabled={isTimeUp}
         />
       </Stack>
     </Screen>

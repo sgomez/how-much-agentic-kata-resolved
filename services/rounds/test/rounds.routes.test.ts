@@ -1,6 +1,10 @@
 import { createStaticVerifier } from "@hmk/auth";
 import type { Question } from "@hmk/contracts/catalog";
-import { CreateRoundResponse, RoundViewResponse } from "@hmk/contracts/rounds";
+import {
+  CreateRoundResponse,
+  RoundInternalResponse,
+  RoundViewResponse,
+} from "@hmk/contracts/rounds";
 import { describe, expect, it } from "vitest";
 
 import { composeRounds } from "../src/composition.ts";
@@ -214,5 +218,92 @@ describe("rounds routes", () => {
     await expect(res.json()).resolves.toMatchObject({
       error: { code: "round-not-found" },
     });
+  });
+
+  it("answers internal read with number, deadline, min, max and solution", async () => {
+    const { app } = setupService();
+    await app.request("/internal/GAME/1", post(authHost, defaultCreateBody));
+
+    const res = await app.request("/internal/GAME/1", {
+      headers: authPlayer,
+    });
+
+    expect(res.status).toBe(200);
+    const body = RoundInternalResponse.parse(await res.json());
+    expect(body).toStrictEqual({
+      deadline: "2026-01-01T12:00:30.000Z",
+      max: 100,
+      min: 0,
+      number: 1,
+      solution: null,
+    });
+  });
+
+  it("answers 403 not-a-player for internal read when token is not among players", async () => {
+    const { app } = setupService();
+    await app.request("/internal/GAME/1", post(authHost, defaultCreateBody));
+
+    const res = await app.request("/internal/GAME/1", {
+      headers: authStranger,
+    });
+
+    expect(res.status).toBe(403);
+    await expect(res.json()).resolves.toMatchObject({
+      error: { code: "not-a-player" },
+    });
+  });
+
+  it("answers 404 round-not-found for internal read when round does not exist", async () => {
+    const { app } = setupService();
+    const res = await app.request("/internal/GAME/99", {
+      headers: authPlayer,
+    });
+
+    expect(res.status).toBe(404);
+    await expect(res.json()).resolves.toMatchObject({
+      error: { code: "round-not-found" },
+    });
+  });
+
+  it("1 ms before deadline, round is estimating and solution is null", async () => {
+    const { app, clock } = setupService();
+    await app.request("/internal/GAME/1", post(authHost, defaultCreateBody));
+
+    // 1 ms before deadline: 2026-01-01T12:00:29.999Z
+    clock.set(new Date("2026-01-01T12:00:29.999Z"));
+
+    const viewRes = await app.request("/GAME/1", {
+      headers: authPlayer,
+    });
+    const view = RoundViewResponse.parse(await viewRes.json());
+    expect(view.phase).toBe("estimating");
+    expect(view.solution).toBeNull();
+
+    const internalRes = await app.request("/internal/GAME/1", {
+      headers: authPlayer,
+    });
+    const internal = RoundInternalResponse.parse(await internalRes.json());
+    expect(internal.solution).toBeNull();
+  });
+
+  it("moving fixed clock to deadline turns phase to revealed and reveals solution", async () => {
+    const { app, clock } = setupService();
+    await app.request("/internal/GAME/1", post(authHost, defaultCreateBody));
+
+    // At deadline: 2026-01-01T12:00:30.000Z
+    clock.set(new Date("2026-01-01T12:00:30.000Z"));
+
+    const viewRes = await app.request("/GAME/1", {
+      headers: authPlayer,
+    });
+    const view = RoundViewResponse.parse(await viewRes.json());
+    expect(view.phase).toBe("revealed");
+    expect(view.solution).toBe(42);
+
+    const internalRes = await app.request("/internal/GAME/1", {
+      headers: authPlayer,
+    });
+    const internal = RoundInternalResponse.parse(await internalRes.json());
+    expect(internal.solution).toBe(42);
   });
 });
