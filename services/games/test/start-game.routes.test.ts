@@ -9,6 +9,7 @@ import { DeckExhaustedError } from "../src/domain/game.errors.ts";
 import type { RoundsPort } from "../src/domain/ports/rounds.port.ts";
 import { FixedCodeGenerator } from "../src/infra/fixed-code-generator.adapter.ts";
 import { MemoryGameRepository } from "../src/infra/memory-game-repository.adapter.ts";
+import { MemoryImpostor } from "../src/infra/memory-impostor.adapter.ts";
 import { MemoryRounds } from "../src/infra/memory-rounds.adapter.ts";
 
 const verifier = createStaticVerifier({
@@ -57,6 +58,7 @@ const setup = async ({
   const app = composeGames({
     codes: new FixedCodeGenerator(["KQZT"]),
     games: repository,
+    impostor: new MemoryImpostor(),
     rounds,
     verifier,
   });
@@ -101,6 +103,7 @@ describe("start game", () => {
     let phaseSeenByRounds: string | undefined;
     const holder: { view?: () => Promise<GameView> } = {};
     const rounds: RoundsPort = {
+      getRound: () => Promise.reject(new Error("not used")),
       createRound: async () => {
         const seen = await holder.view?.();
         phaseSeenByRounds = seen?.phase;

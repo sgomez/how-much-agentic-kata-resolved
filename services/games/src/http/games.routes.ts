@@ -1,4 +1,4 @@
-import { CreateGameRequest } from "@hmk/contracts/games";
+import { CreateGameRequest, NextRoundRequest } from "@hmk/contracts/games";
 import type {
   CreateGameResponse,
   GameView,
@@ -10,6 +10,7 @@ import type { CreateGame } from "../application/create-game.use-case.ts";
 import type { GetGameView } from "../application/game-view.query.ts";
 import type { JoinGame } from "../application/join-game.use-case.ts";
 import type { ListPlayers } from "../application/list-players.query.ts";
+import type { NextRound } from "../application/next-round.use-case.ts";
 import type { StartGame } from "../application/start-game.use-case.ts";
 
 /** Public API of the games service, mounted by the gateway under `/api/games`. */
@@ -18,6 +19,7 @@ export const gamesRoutes =
     createGame: Pick<CreateGame, "execute">;
     gameView: Pick<GetGameView, "execute">;
     startGame: Pick<StartGame, "execute">;
+    nextRound: Pick<NextRound, "execute">;
     joinGame: Pick<JoinGame, "execute">;
     listPlayers: Pick<ListPlayers, "execute">;
   }) =>
@@ -38,6 +40,16 @@ export const gamesRoutes =
       await deps.startGame.execute({
         code: c.req.param("code"),
         playerId: c.var.user.id,
+      });
+      return c.body(null, 204);
+    });
+
+    app.post("/:code/next", async (c) => {
+      const { round } = NextRoundRequest.parse(await c.req.json());
+      await deps.nextRound.execute({
+        code: c.req.param("code"),
+        playerId: c.var.user.id,
+        round,
       });
       return c.body(null, 204);
     });

@@ -8,11 +8,14 @@ import { CreateGame } from "./application/create-game.use-case.ts";
 import { GetGameView } from "./application/game-view.query.ts";
 import { JoinGame } from "./application/join-game.use-case.ts";
 import { ListPlayers } from "./application/list-players.query.ts";
+import { NextRound } from "./application/next-round.use-case.ts";
 import { StartGame } from "./application/start-game.use-case.ts";
 import type { GameRepository } from "./domain/game.repository.ts";
 import type { CodeGenerator } from "./domain/ports/code-generator.port.ts";
+import type { ImpostorPort } from "./domain/ports/impostor.port.ts";
 import type { RoundsPort } from "./domain/ports/rounds.port.ts";
 import { gamesRoutes } from "./http/games.routes.ts";
+import { ImpostorHttpAdapter } from "./infra/impostor-http.adapter.ts";
 import { MemoryGameRepository } from "./infra/memory-game-repository.adapter.ts";
 import { randomCodeGenerator } from "./infra/random-code-generator.adapter.ts";
 import { RoundsHttpAdapter } from "./infra/rounds-http.adapter.ts";
@@ -20,6 +23,7 @@ import { RoundsHttpAdapter } from "./infra/rounds-http.adapter.ts";
 export interface GamesDeps {
   verifier: TokenVerifier;
   codes: CodeGenerator;
+  impostor: ImpostorPort;
   rounds: RoundsPort;
   /** Tests pass a repository they can fill; by default a new empty one. */
   games?: GameRepository;
@@ -30,6 +34,7 @@ export interface GamesDeps {
 export const composeGames = ({
   verifier,
   codes,
+  impostor,
   rounds,
   games = new MemoryGameRepository(),
   log,
@@ -38,12 +43,20 @@ export const composeGames = ({
   const gameView = new GetGameView({ games });
   const joinGame = new JoinGame({ games });
   const listPlayers = new ListPlayers({ games });
+  const nextRound = new NextRound({ games, impostor, rounds });
   const startGame = new StartGame({ games, rounds });
   return createService({
     log,
     name: "games",
     routes: [
-      gamesRoutes({ createGame, gameView, joinGame, listPlayers, startGame }),
+      gamesRoutes({
+        createGame,
+        gameView,
+        joinGame,
+        listPlayers,
+        nextRound,
+        startGame,
+      }),
     ],
     verifier,
   });
@@ -53,6 +66,7 @@ export const composeGames = ({
 export const composeGamesFromEnv = (_env: NodeJS.ProcessEnv): ServiceApp =>
   composeGames({
     codes: randomCodeGenerator,
+    impostor: new ImpostorHttpAdapter(createServiceClient(urlOf("impostor"))),
     log: true,
     rounds: new RoundsHttpAdapter(createServiceClient(urlOf("rounds"))),
     verifier: createJwksVerifier(jwksUrl()),

@@ -1,4 +1,7 @@
-import { CreateRoundResponse } from "@hmk/contracts/rounds";
+import {
+  CreateRoundResponse,
+  RoundInternalResponse,
+} from "@hmk/contracts/rounds";
 import type { CreateRoundRequest } from "@hmk/contracts/rounds";
 import { ServiceCallError } from "@hmk/kit";
 import type { ServiceClient } from "@hmk/kit";
@@ -34,5 +37,12 @@ export class RoundsHttpAdapter implements RoundsPort {
       }
       throw error;
     }
+  }
+
+  getRound(code: string, number: number): Promise<RoundInternalResponse> {
+    return this.#client.get(
+      `/internal/${encodeURIComponent(code)}/${number}`,
+      RoundInternalResponse
+    );
   }
 }
