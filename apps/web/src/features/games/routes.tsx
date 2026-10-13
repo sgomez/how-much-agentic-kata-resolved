@@ -10,6 +10,6 @@ import { GamesHomePage } from "./home-page.tsx";
  * `useView` and send actions with `api` from src/shell.
  */
 export const routes: RouteObject[] = [
-  { path: "/games", element: <GamesHomePage /> },
+  { path: "/", element: <GamesHomePage /> },
   { path: "/games/:code", element: <GamePage /> },
 ];
