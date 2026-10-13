@@ -8,6 +8,7 @@ import type { ServiceApp } from "@hmk/kit";
 import type { ChooseImpostor } from "../application/choose-impostor.use-case.ts";
 import type { GetVerdict } from "../application/get-verdict.query.ts";
 import { InvalidCandidatesError } from "../domain/voting.errors.ts";
+import { roundOf } from "./round-param.ts";
 
 /** The routes other services call: Rounds chooses, Scoring and Games read the verdict. */
 export const internalRoutes =
@@ -33,7 +34,7 @@ export const internalRoutes =
         deadline: new Date(request.deadline),
         gameCode: c.req.param("code"),
         hostId: request.hostId,
-        round: Number(c.req.param("n")),
+        round: roundOf(c.req.param("n")),
       });
       const body: ChooseImpostorResponse = { impostorId };
       return c.json(body, created ? 201 : 200);
@@ -42,7 +43,7 @@ export const internalRoutes =
     app.get("/internal/:code/:n/verdict", async (c) => {
       const body: VerdictResponse = await deps.getVerdict.execute(
         c.req.param("code"),
-        Number(c.req.param("n"))
+        roundOf(c.req.param("n"))
       );
       return c.json(body);
     });
