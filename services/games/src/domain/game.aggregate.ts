@@ -1,3 +1,5 @@
+import type { GamePhase } from "@hmk/contracts/games";
+
 import {
   GameAlreadyStartedError,
   GameNotStartedError,
@@ -12,7 +14,7 @@ export interface Player {
   readonly nickname: string;
 }
 
-export type Phase = "lobby" | "playing" | "finished";
+export type Phase = GamePhase;
 
 export interface Settings {
   /** Packs to draw questions from; empty means every pack. */
@@ -96,13 +98,13 @@ export class Game {
   }
 
   /**
-   * Whether the host leaving `round` changes anything: false once the game has
-   * moved on from it or finished (a double click, a retry).
+   * Whether the host moving on from `round` changes anything: false once the
+   * game has moved on from it or finished (a double click, a retry).
    * @throws {NotTheHostError} when `playerId` is not the host.
    * @throws {GameNotStartedError} in the lobby.
    * @throws {WrongRoundError} when `round` is ahead of the current round.
    */
-  canLeave(playerId: string, round: number): boolean {
+  canMoveOn(playerId: string, round: number): boolean {
     if (playerId !== this.host.id) {
       throw new NotTheHostError();
     }
@@ -115,16 +117,19 @@ export class Game {
     return this.#phase === "playing" && round === this.#currentRound;
   }
 
-  /** The game plays the round after `round`, unless it has already moved on from it. */
-  moveOnFrom(round: number): void {
-    if (this.#phase === "playing" && this.#currentRound === round) {
-      this.#currentRound = round + 1;
+  /**
+   * The game moves on from `round`: it plays the next round when rounds has
+   * created it, and finishes after the last round or when no round was
+   * created (the deck is exhausted). Nothing changes when it has already moved
+   * on from `round`.
+   */
+  moveOn(round: number, nextRoundCreated: boolean): void {
+    if (this.#phase !== "playing" || this.#currentRound !== round) {
+      return;
     }
-  }
-
-  /** The game ends on the round it is on, unless it has already moved on from `round`. */
-  finishAfter(round: number): void {
-    if (this.#phase === "playing" && this.#currentRound === round) {
+    if (nextRoundCreated && !this.isLastRound(round)) {
+      this.#currentRound = round + 1;
+    } else {
       this.#phase = "finished";
     }
   }
@@ -145,15 +150,15 @@ export class Game {
 
   /**
    * Adds the player at the end of the line; a player already in is left alone.
-   * @throws {GameAlreadyStartedError} once the game has left the lobby
+   * @throws {GameAlreadyStartedError} when a new player comes once the game has left the lobby
    * @throws {NicknameTakenError} when another player has the nickname, ignoring case and spaces at either end
    */
   join(player: Player): void {
-    if (this.#phase !== "lobby") {
-      throw new GameAlreadyStartedError(this.code);
-    }
     if (this.#players.some(({ id }) => id === player.id)) {
       return;
+    }
+    if (this.#phase !== "lobby") {
+      throw new GameAlreadyStartedError(this.code);
     }
     const normalised = normalise(player.nickname);
     if (

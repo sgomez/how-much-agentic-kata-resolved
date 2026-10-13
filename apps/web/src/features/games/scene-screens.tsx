@@ -1,22 +1,24 @@
 import { EmptyState, Screen, Spinner, Stack, TopBar } from "@hmk/ui";
-import type { ReactNode } from "react";
 
 import { LobbyScreen } from "./lobby-screen.tsx";
 import type { SceneScreen } from "./scene-director.ts";
-
-/** What every screen of another group receives: the game code and the bottom-action slot. */
-export interface SceneScreenProps {
-  code: string;
-  bottom?: ReactNode;
-}
+import type { SceneScreenProps } from "./scene-screen-props.ts";
 
 const Placeholder = ({
   title,
   group,
   code,
   bottom,
+  banner,
+  overlays,
 }: SceneScreenProps & { title: string; group: string }) => (
-  <Screen top={<TopBar gameCode={code} />} bottom={bottom} centered>
+  <Screen
+    top={<TopBar gameCode={code} />}
+    bottom={bottom}
+    banner={banner}
+    overlays={overlays}
+    centered
+  >
     <EmptyState
       icon="ruler"
       title={title}
@@ -25,8 +27,13 @@ const Placeholder = ({
   </Screen>
 );
 
-const Loading = ({ code }: SceneScreenProps) => (
-  <Screen top={<TopBar gameCode={code} />} centered>
+const Loading = ({ code, banner, overlays }: SceneScreenProps) => (
+  <Screen
+    top={<TopBar gameCode={code} />}
+    banner={banner}
+    overlays={overlays}
+    centered
+  >
     <Stack align="center">
       <Spinner size={32} />
     </Stack>

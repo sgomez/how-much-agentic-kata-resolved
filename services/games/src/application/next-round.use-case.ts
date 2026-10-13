@@ -1,13 +1,14 @@
+import { findGame } from "../domain/find-game.ts";
+import type { Game } from "../domain/game.aggregate.ts";
 import {
   DeckExhaustedError,
   RoundNotRevealedError,
-  UnknownCodeError,
   VotingNotOverError,
 } from "../domain/game.errors.ts";
 import type { GameRepository } from "../domain/game.repository.ts";
 import type { ImpostorPort } from "../domain/ports/impostor.port.ts";
 import type { RoundsPort } from "../domain/ports/rounds.port.ts";
-import { roundRequest } from "./round-request.ts";
+import { roundRequest } from "../domain/round-request.ts";
 
 export interface NextRoundInput {
   /** In any case. */
@@ -40,11 +41,8 @@ export class NextRound {
   }
 
   async execute({ code, playerId, round }: NextRoundInput): Promise<void> {
-    const game = await this.#games.get(code.toUpperCase());
-    if (game === undefined) {
-      throw new UnknownCodeError(code);
-    }
-    if (!game.canLeave(playerId, round)) {
+    const game = await findGame(this.#games, code);
+    if (!game.canMoveOn(playerId, round)) {
       return;
     }
     const { solution } = await this.#rounds.getRound(game.code, round);
@@ -57,23 +55,22 @@ export class NextRound {
         throw new VotingNotOverError(round);
       }
     }
-    if (game.isLastRound(round)) {
-      game.finishAfter(round);
-    } else {
-      try {
-        await this.#rounds.createRound(
-          game.code,
-          round + 1,
-          roundRequest(game)
-        );
-        game.moveOnFrom(round);
-      } catch (error) {
-        if (!(error instanceof DeckExhaustedError)) {
-          throw error;
-        }
-        game.finishAfter(round);
-      }
-    }
+    const nextRoundCreated =
+      !game.isLastRound(round) && (await this.#createNextRound(game, round));
+    game.moveOn(round, nextRoundCreated);
     await this.#games.save(game);
+  }
+
+  /** False when rounds has no question left for the round. */
+  async #createNextRound(game: Game, round: number): Promise<boolean> {
+    try {
+      await this.#rounds.createRound(game.code, round + 1, roundRequest(game));
+      return true;
+    } catch (error) {
+      if (error instanceof DeckExhaustedError) {
+        return false;
+      }
+      throw error;
+    }
   }
 }

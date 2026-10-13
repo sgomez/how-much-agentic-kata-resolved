@@ -1,7 +1,7 @@
-import { UnknownCodeError } from "../domain/game.errors.ts";
+import { findGame } from "../domain/find-game.ts";
 import type { GameRepository } from "../domain/game.repository.ts";
 import type { RoundsPort } from "../domain/ports/rounds.port.ts";
-import { roundRequest } from "./round-request.ts";
+import { roundRequest } from "../domain/round-request.ts";
 
 export interface StartGameInput {
   /** In any case. */
@@ -21,10 +21,7 @@ export class StartGame {
   }
 
   async execute({ code, playerId }: StartGameInput): Promise<void> {
-    const game = await this.#games.get(code.toUpperCase());
-    if (game === undefined) {
-      throw new UnknownCodeError(code);
-    }
+    const game = await findGame(this.#games, code);
     game.assertCanStart(playerId);
     await this.#rounds.createRound(game.code, 1, roundRequest(game));
     game.start(playerId);

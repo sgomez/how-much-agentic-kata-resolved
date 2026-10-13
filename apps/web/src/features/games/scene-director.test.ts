@@ -134,6 +134,52 @@ const cases: {
     action: null,
   },
   {
+    name: "stale scoreboard flag, voting not loaded yet",
+    input: {
+      roundPhase: "revealed",
+      impostorMode: true,
+      votingStatus: null,
+      scoreboardSeen: true,
+    },
+    screen: "loading",
+    action: null,
+  },
+  {
+    name: "stale scoreboard flag never skips a voting still pending, host",
+    input: {
+      roundPhase: "revealed",
+      impostorMode: true,
+      votingStatus: "pending",
+      scoreboardSeen: true,
+    },
+    screen: "reveal",
+    action: "open-voting",
+  },
+  {
+    name: "stale scoreboard flag never skips a voting still pending, guest",
+    input: {
+      roundPhase: "revealed",
+      impostorMode: true,
+      votingStatus: "pending",
+      scoreboardSeen: true,
+      isHost: false,
+    },
+    screen: "reveal",
+    action: null,
+  },
+  {
+    name: "revealed, voting over, scoreboard seen, guest",
+    input: {
+      roundPhase: "revealed",
+      impostorMode: true,
+      votingStatus: "over",
+      scoreboardSeen: true,
+      isHost: false,
+    },
+    screen: "scoreboard",
+    action: null,
+  },
+  {
     name: "finished",
     input: { gamePhase: "finished", roundPhase: "revealed" },
     screen: "final-ranking",

@@ -1,6 +1,6 @@
 import type { CreateRoundRequest } from "@hmk/contracts/rounds";
 
-import type { Game } from "../domain/game.aggregate.ts";
+import type { Game } from "./game.aggregate.ts";
 
 /** What rounds needs to create a round of `game`. */
 export const roundRequest = (game: Game): CreateRoundRequest => ({
@@ -10,6 +10,6 @@ export const roundRequest = (game: Game): CreateRoundRequest => ({
   ...(game.settings.packs.length === 0
     ? {}
     : { packs: [...game.settings.packs] }),
-  players: game.players.map(({ id, nickname }) => ({ id, nickname })),
+  players: [...game.players],
   roundSeconds: game.settings.roundSeconds,
 });

@@ -1,6 +1,6 @@
 import type { ListPlayersResponse } from "@hmk/contracts/games";
 
-import { UnknownCodeError } from "../domain/game.errors.ts";
+import { findGame } from "../domain/find-game.ts";
 import type { GameRepository } from "../domain/game.repository.ts";
 
 /** Every player of a game in joining order, for the services that score it. */
@@ -13,13 +13,10 @@ export class ListPlayers {
 
   /** @param code in any case */
   async execute(code: string): Promise<ListPlayersResponse> {
-    const game = await this.#games.get(code.toUpperCase());
-    if (game === undefined) {
-      throw new UnknownCodeError(code);
-    }
+    const game = await findGame(this.#games, code);
     return {
       impostorMode: game.settings.impostorMode,
-      players: game.players.map(({ id, nickname }) => ({ id, nickname })),
+      players: [...game.players],
     };
   }
 }
