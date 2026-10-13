@@ -72,8 +72,8 @@ export const CreateGameRequest = z.object({
   impostorMode: z.boolean(),
 });
 export type CreateGameRequest = z.input<typeof CreateGameRequest>;
-// Open: what happens with a pack the catalog does not have (rejected here, or
-// a 422 `no-questions-in-packs` when the host starts)?
+// The host picks packs from the catalog's list (screen 02), so an unknown pack
+// only comes in a hand-made request: starting that game fails with a 500.
 
 /** 201 */
 export const CreateGameResponse = z.object({
@@ -113,11 +113,12 @@ export type GameView = z.infer<typeof GameView>;
  * POST /api/games/:code/start
  * The host starts the game. Games asks rounds (`rounds POST /internal/:code/1`)
  * and only moves to `playing`, with `currentRound` 1, once round 1 exists.
+ * It sends the settings' packs, and leaves `packs` out when they are empty.
  * No request body. 204.
  * Errors: 403 `not-the-host`, 404 `unknown-code`, 409 `game-already-started`,
  * 409 `not-enough-players` (fewer than two, or three in impostor mode; rounds
- * is not asked), 409 `deck-exhausted` (the game stays in the lobby), 502 if
- * rounds does not answer.
+ * is not asked), 409 `deck-exhausted` (the game stays in the lobby), 500 if
+ * rounds fails.
  */
 
 /**
@@ -136,8 +137,8 @@ export type GameView = z.infer<typeof GameView>;
  * 204.
  * Errors: 403 `not-the-host`, 404 `unknown-code`, 409 `game-not-started`,
  * 409 `wrong-round` (`round` is ahead of the current round),
- * 409 `round-not-revealed`, 409 `voting-not-over`, 502 if rounds or impostor
- * do not answer or impostor has no verdict for the round (404).
+ * 409 `round-not-revealed`, 409 `voting-not-over`, 500 if rounds or impostor
+ * fail or impostor has no verdict for the round (404).
  */
 export const NextRoundRequest = z.object({
   /** The round the host is moving on from: the `currentRound` their phone sees. */
@@ -148,10 +149,12 @@ export type NextRoundRequest = z.infer<typeof NextRoundRequest>;
 /**
  * GET /internal/:code/players (service to service: scoring)
  * Every player in the game, whether they estimated or not, in the order they
- * joined. Error: 404 `unknown-code`.
+ * joined, and whether the game is in impostor mode, so scoring only asks for
+ * verdicts when there are any. Error: 404 `unknown-code`.
  */
 export const ListPlayersResponse = z.object({
   players: GamePlayers,
+  impostorMode: z.boolean(),
 });
 export type ListPlayersResponse = z.infer<typeof ListPlayersResponse>;
 // Games are never deleted while the service runs, so the final scoreboard
