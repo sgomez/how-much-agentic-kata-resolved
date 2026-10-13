@@ -23,7 +23,7 @@ export class DeckExhaustedError extends Error {
   readonly code = "deck-exhausted";
 
   constructor() {
-    super("No question is left to start the game");
+    super("No question is left for the round");
     this.name = "DeckExhaustedError";
   }
 }

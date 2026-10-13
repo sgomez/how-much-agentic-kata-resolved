@@ -1,7 +1,15 @@
 import type { GameView } from "@hmk/contracts/games";
 import type { VotingView } from "@hmk/contracts/impostor";
 import type { RoundViewResponse } from "@hmk/contracts/rounds";
-import { Button, BottomActionBar, EmptyState, Screen, Toast } from "@hmk/ui";
+import {
+  BottomActionBar,
+  Button,
+  ConnectionBanner,
+  EmptyState,
+  Screen,
+  Toast,
+  TopBar,
+} from "@hmk/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -31,6 +39,20 @@ const errorMessages: Record<string, string> = {
   "wrong-round": "La partida ya ha avanzado",
 };
 
+const genericError = "Algo ha fallado. Inténtalo de nuevo.";
+
+/** Runs `work`; the message to show when it fails, or null when it works. */
+const failureOf = async (work: () => Promise<void>): Promise<string | null> => {
+  try {
+    await work();
+    return null;
+  } catch (error) {
+    return error instanceof ApiError
+      ? (errorMessages[error.code] ?? genericError)
+      : genericError;
+  }
+};
+
 /** A 404 means "not there yet": the phone shows the loading screen. */
 const orNotFound = async <T,>(read: () => Promise<T>): Promise<T | null> => {
   try {
@@ -50,10 +72,12 @@ const useGameViews = (code: string) => {
   const round = game?.phase === "lobby" ? null : game?.currentRound;
   const impostorMode = game?.settings.impostorMode ?? false;
 
-  const { data: roundView } = useView(["round", code, round], () =>
-    round === null || round === undefined
-      ? Promise.resolve(null)
-      : orNotFound(() => api<RoundViewResponse>(`/rounds/${code}/${round}`))
+  const { data: roundView, error: roundError } = useView(
+    ["round", code, round],
+    () =>
+      round === null || round === undefined
+        ? Promise.resolve(null)
+        : orNotFound(() => api<RoundViewResponse>(`/rounds/${code}/${round}`))
   );
   const roundPhase = roundView?.phase ?? null;
   const votingWanted =
@@ -62,7 +86,7 @@ const useGameViews = (code: string) => {
     roundPhase === "revealed" &&
     round !== null &&
     round !== undefined;
-  const { data: votingView } = useView(
+  const { data: votingView, error: votingError } = useView(
     ["voting", code, round, votingWanted],
     () =>
       votingWanted
@@ -73,6 +97,8 @@ const useGameViews = (code: string) => {
   return {
     game,
     gameError,
+    reconnecting:
+      gameError !== null || roundError !== null || votingError !== null,
     roundPhase,
     votingStatus: votingView?.voting ?? null,
   };
@@ -87,11 +113,15 @@ export const GamePage = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const { game, gameError, roundPhase, votingStatus } = useGameViews(code);
+  const { game, gameError, reconnecting, roundPhase, votingStatus } =
+    useGameViews(code);
+  const banner = (
+    <ConnectionBanner status={reconnecting ? "reconnecting" : "connected"} />
+  );
 
   if (gameError instanceof ApiError && gameError.code === "unknown-code") {
     return (
-      <Screen centered>
+      <Screen top={<TopBar gameCode={code} />} centered>
         <EmptyState
           icon="alert"
           tone="danger"
@@ -102,7 +132,7 @@ export const GamePage = () => {
     );
   }
   if (game === undefined) {
-    return <SceneScreenView screen="loading" code={code} />;
+    return <SceneScreenView screen="loading" code={code} banner={banner} />;
   }
 
   const scene = chooseScene({
@@ -124,7 +154,8 @@ export const GamePage = () => {
       return;
     }
     setBusy(true);
-    try {
+    // `failureOf` never throws, so the button is always released.
+    const failure = await failureOf(async () => {
       if (action === "start") {
         await api(`/games/${code}/start`, { method: "POST" });
       } else if (action === "open-voting") {
@@ -138,14 +169,8 @@ export const GamePage = () => {
         });
       }
       await queryClient.invalidateQueries({ queryKey: ["game", code] });
-    } catch (error) {
-      setToast(
-        error instanceof ApiError
-          ? (errorMessages[error.code] ??
-              "Algo ha fallado. Inténtalo de nuevo.")
-          : "Algo ha fallado. Inténtalo de nuevo."
-      );
-    }
+    });
+    setToast(failure);
     setBusy(false);
   };
 
@@ -172,14 +197,19 @@ export const GamePage = () => {
     );
 
   return (
-    <>
-      <SceneScreenView screen={scene.screen} code={code} bottom={bottom} />
-      <Toast
-        open={toast !== null}
-        message={toast ?? ""}
-        tone="danger"
-        onClose={() => setToast(null)}
-      />
-    </>
+    <SceneScreenView
+      screen={scene.screen}
+      code={code}
+      bottom={bottom}
+      banner={banner}
+      overlays={
+        <Toast
+          open={toast !== null}
+          message={toast ?? ""}
+          tone="danger"
+          onClose={() => setToast(null)}
+        />
+      }
+    />
   );
 };

@@ -7,7 +7,7 @@ import type {
 import type { ServiceApp } from "@hmk/kit";
 
 import type { CreateGame } from "../application/create-game.use-case.ts";
-import type { GetGameView } from "../application/game-view.query.ts";
+import type { GetGameView } from "../application/get-game-view.query.ts";
 import type { JoinGame } from "../application/join-game.use-case.ts";
 import type { ListPlayers } from "../application/list-players.query.ts";
 import type { NextRound } from "../application/next-round.use-case.ts";

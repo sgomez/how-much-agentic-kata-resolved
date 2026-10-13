@@ -4,8 +4,10 @@
  * services or other features.
  */
 
+import type { GameView } from "@hmk/contracts/games";
+
 export interface SceneInput {
-  gamePhase: "lobby" | "playing" | "finished";
+  gamePhase: GameView["phase"];
   impostorMode: boolean;
   isHost: boolean;
   /** Null while the round of `currentRound` is not found yet. */

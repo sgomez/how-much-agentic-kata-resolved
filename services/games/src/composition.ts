@@ -5,7 +5,7 @@ import type { ServiceApp } from "@hmk/kit";
 import { jwksUrl, urlOf } from "@hmk/kit/topology";
 
 import { CreateGame } from "./application/create-game.use-case.ts";
-import { GetGameView } from "./application/game-view.query.ts";
+import { GetGameView } from "./application/get-game-view.query.ts";
 import { JoinGame } from "./application/join-game.use-case.ts";
 import { ListPlayers } from "./application/list-players.query.ts";
 import { NextRound } from "./application/next-round.use-case.ts";

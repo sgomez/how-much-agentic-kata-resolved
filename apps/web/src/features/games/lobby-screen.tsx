@@ -1,6 +1,5 @@
 import type { GameView } from "@hmk/contracts/games";
 import {
-  ConnectionBanner,
   DetailList,
   GameCodeDisplay,
   Heading,
@@ -10,11 +9,11 @@ import {
   Stack,
   TopBar,
 } from "@hmk/ui";
-import type { ReactNode } from "react";
 
 import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
 import { useView } from "../../shell/use-view.ts";
+import type { SceneScreenProps } from "./scene-screen-props.ts";
 
 const settingsRows = ({ settings }: GameView) => [
   { label: "Rondas", value: String(settings.rounds) },
@@ -30,23 +29,19 @@ const settingsRows = ({ settings }: GameView) => [
 export const LobbyScreen = ({
   code,
   bottom,
-}: {
-  code: string;
-  bottom?: ReactNode;
-}) => {
+  banner,
+  overlays,
+}: SceneScreenProps) => {
   const { data: session } = authClient.useSession();
-  const { data: view, error } = useView(["game", code], () =>
+  const { data: view } = useView(["game", code], () =>
     api<GameView>(`/games/${code}`)
   );
   return (
     <Screen
       top={<TopBar gameCode={code} />}
-      banner={
-        <ConnectionBanner
-          status={error === null ? "connected" : "reconnecting"}
-        />
-      }
+      banner={banner}
       bottom={bottom}
+      overlays={overlays}
     >
       {view === undefined ? (
         <Skeleton shape="circle" />

@@ -206,6 +206,17 @@ describe("games routes", () => {
       await expect(nicknames(app)).resolves.toStrictEqual(["Ana", "Ben"]);
     });
 
+    it("answers 204 to a player already in who joins again after the game started", async () => {
+      const app = await lobby();
+      await join(app, "KQZT");
+      await app.request("/KQZT/start", { headers: auth, method: "POST" });
+
+      const res = await join(app, "KQZT");
+
+      expect(res.status).toBe(204);
+      await expect(nicknames(app)).resolves.toStrictEqual(["Ana", "Ben"]);
+    });
+
     it("answers 409 nickname-taken to another player with the same nickname, ignoring case and spaces", async () => {
       const app = await lobby();
       await join(app, "KQZT");
