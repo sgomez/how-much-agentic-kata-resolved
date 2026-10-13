@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router";
 
 import { PlaceholderPage } from "../../shell/placeholder-page.tsx";
+import { GamePage } from "./game-page.tsx";
 
 /**
  * Screens of the games group. Add your routes here; the shell mounts them behind
@@ -13,4 +14,5 @@ export const routes: RouteObject[] = [
     path: "/games",
     element: <PlaceholderPage title="Partidas" group="games" />,
   },
+  { path: "/games/:code", element: <GamePage /> },
 ];
