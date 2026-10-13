@@ -18,21 +18,17 @@ import type { ReactNode } from "react";
 
 import { ApiError, api } from "../../shell/api.ts";
 import { useView } from "../../shell/use-view.ts";
+import { AfterSendingScreen } from "./after-sending-screen.tsx";
 
 export interface RoundScreenProps {
   gameCode: string;
   bottomSlot?: ReactNode;
-  bottomAction?: ReactNode;
 }
 
-export const RoundScreen = ({
-  gameCode,
-  bottomSlot,
-  bottomAction,
-}: RoundScreenProps) => {
+export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
   const [selected, setSelected] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const bottom = bottomSlot ?? bottomAction;
+  const [editing, setEditing] = useState(false);
 
   const { data: game } = useView<GameView | null>(
     ["games", gameCode],
@@ -93,7 +89,9 @@ export const RoundScreen = ({
       <Screen
         top={<TopBar gameCode={gameCode} />}
         bottom={
-          bottom ? <BottomActionBar>{bottom}</BottomActionBar> : undefined
+          bottomSlot ? (
+            <BottomActionBar>{bottomSlot}</BottomActionBar>
+          ) : undefined
         }
       >
         <Stack gap={4}>
@@ -103,8 +101,20 @@ export const RoundScreen = ({
       </Screen>
     );
   }
+
   const sentValue = estimates?.myEstimate ?? null;
   const isSent = sentValue !== null;
+
+  if (isSent && !editing) {
+    return (
+      <AfterSendingScreen
+        gameCode={gameCode}
+        bottomSlot={bottomSlot}
+        onEdit={() => setEditing(true)}
+      />
+    );
+  }
+
   const currentValue = selected ?? sentValue;
   const changed = isSent && currentValue !== null && currentValue !== sentValue;
   const isTimeUp =
@@ -128,6 +138,7 @@ export const RoundScreen = ({
       });
       setSelected(null);
       await refetchEstimates();
+      setEditing(false);
       setSubmitting(false);
     } catch (error) {
       setSubmitting(false);
@@ -210,7 +221,7 @@ export const RoundScreen = ({
         <BottomActionBar hint={roundHint()}>
           <AnswerTracker players={trackerPlayers} compact />
           {action}
-          {bottom}
+          {bottomSlot}
         </BottomActionBar>
       }
     >

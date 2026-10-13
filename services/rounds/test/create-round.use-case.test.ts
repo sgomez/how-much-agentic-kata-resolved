@@ -38,11 +38,42 @@ const players: RoundPlayer[] = [
 ];
 
 describe("CreateRound use case", () => {
+  it("samples clock.now() before drawing question from catalog", async () => {
+    const rounds = new MemoryRoundRepository();
+    const order: string[] = [];
+    const clock = {
+      now: () => {
+        order.push("clock");
+        return new Date("2026-01-01T10:00:00.000Z");
+      },
+    };
+    const catalog = {
+      drawQuestion: () => {
+        order.push("catalog");
+        return Promise.resolve(question1);
+      },
+    };
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
+
+    await useCase.execute({
+      gameCode: "GAME",
+      hostId: "h1",
+      impostorMode: false,
+      players,
+      roundNumber: 1,
+      roundSeconds: 30,
+    });
+
+    expect(order).toStrictEqual(["clock", "catalog"]);
+  });
+
   it("creates round 1 and computes deadline from clock.now() + roundSeconds", async () => {
     const rounds = new MemoryRoundRepository();
     const catalog = new MemoryCatalog([question1]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     const result = await useCase.execute({
       gameCode: "GAME",
@@ -65,7 +96,8 @@ describe("CreateRound use case", () => {
     const rounds = new MemoryRoundRepository();
     const catalog = new MemoryCatalog([question1, question2]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     await useCase.execute({
       gameCode: "GAME",
@@ -94,7 +126,8 @@ describe("CreateRound use case", () => {
     const rounds = new MemoryRoundRepository();
     const catalog = new MemoryCatalog([question1]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     await expect(
       useCase.execute({
@@ -112,7 +145,8 @@ describe("CreateRound use case", () => {
     const rounds = new MemoryRoundRepository();
     const catalog = new MemoryCatalog([question1]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     await useCase.execute({
       gameCode: "GAME",
@@ -143,7 +177,8 @@ describe("CreateRound use case", () => {
     // Catalog with empty questions list
     const catalog = new MemoryCatalog([]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     await expect(
       useCase.execute({
@@ -165,7 +200,13 @@ describe("CreateRound use case", () => {
       drawQuestion: () => Promise.reject(new Error("Catalog service error")),
     };
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog: failingCatalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({
+      catalog: failingCatalog,
+      clock,
+      impostor,
+      rounds,
+    });
 
     await expect(
       useCase.execute({
@@ -185,7 +226,8 @@ describe("CreateRound use case", () => {
     const rounds = new MemoryRoundRepository();
     const catalog = new MemoryCatalog([question1]);
     const clock = new FixedClock(new Date("2026-01-01T10:00:00.000Z"));
-    const useCase = new CreateRound({ catalog, clock, rounds });
+    const impostor = new MemoryImpostorAdapter();
+    const useCase = new CreateRound({ catalog, clock, impostor, rounds });
 
     await useCase.execute({
       gameCode: "GAME",

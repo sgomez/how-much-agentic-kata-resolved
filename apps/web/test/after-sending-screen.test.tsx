@@ -6,10 +6,7 @@ import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import {
-  AfterSendingScreen,
-  WaitingScreen,
-} from "../src/features/rounds/index.ts";
+import { AfterSendingScreen } from "../src/features/rounds/index.ts";
 
 const createTestQueryClient = () =>
   new QueryClient({
@@ -65,8 +62,23 @@ const mockScoring: ListEstimatesResponse = {
 };
 
 describe(AfterSendingScreen, () => {
-  it("exports WaitingScreen as an alias for AfterSendingScreen", () => {
-    expect(WaitingScreen).toBe(AfterSendingScreen);
+  it("disables Cambiar mi estimación button and shows time-up hint when deadline has passed", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(["games", "ABCD"], mockGame);
+    queryClient.setQueryData(["rounds", "ABCD", 1], {
+      ...mockRound,
+      phase: "revealed",
+    });
+    queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
+
+    const html = renderWithClient(
+      <AfterSendingScreen gameCode="ABCD" />,
+      queryClient
+    );
+
+    expect(html).toContain("Cambiar mi estimación");
+    expect(html).toContain("Se acabó el tiempo");
+    expect(html).toContain("disabled");
   });
 
   it("renders loading skeleton when round data is not yet loaded", () => {
