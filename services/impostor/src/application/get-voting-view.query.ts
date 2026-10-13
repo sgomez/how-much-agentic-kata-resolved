@@ -15,7 +15,10 @@ export interface VotingViewOutput {
   impostorId: string | null;
 }
 
-/** What a phone of the round sees; never who voted for whom. */
+/**
+ * What a phone of the round sees; never who voted for whom. `voters` holds at
+ * most the caller: the one who never votes is the impostor.
+ */
 export class GetVotingView {
   readonly #votings: VotingRepository;
 
@@ -36,7 +39,7 @@ export class GetVotingView {
       candidates: voting.candidates,
       impostorId: voting.impostorId,
       verdict: voting.verdict,
-      voters: voting.voters,
+      voters: voting.voters.filter((id) => id === userId),
       voting: voting.status,
     };
   }

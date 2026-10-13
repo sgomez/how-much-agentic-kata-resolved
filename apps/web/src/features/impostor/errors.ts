@@ -5,6 +5,7 @@ const FALLBACK = "Algo ha fallado. Inténtalo otra vez.";
 const MESSAGES: Record<string, string> = {
   "already-voted": "Ya has votado. Tu voto es definitivo.",
   "voting-not-open": "La votación no está abierta.",
+  "impostor-cannot-vote": "Esta vez no votas: eras el impostor.",
   "self-vote": "No puedes votarte a ti mismo.",
   "unknown-suspect": "Ese jugador no está en la ronda.",
   "round-not-revealed":

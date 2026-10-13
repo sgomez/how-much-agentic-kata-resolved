@@ -1,5 +1,6 @@
 import {
   AlreadyVotedError,
+  ImpostorCannotVoteError,
   InvalidCandidatesError,
   NotAPlayerError,
   NotTheHostError,
@@ -22,8 +23,8 @@ const normalise = (nickname: string): string => nickname.trim().toLowerCase();
 
 /**
  * The voting of one round of a game in impostor mode.
- * Invariants: one impostor among the candidates; one final vote per candidate,
- * never for themselves; once over, nothing changes.
+ * Invariants: one impostor among the candidates; one final vote per candidate
+ * but the impostor, who does not vote, never for themselves; once over, nothing changes.
  */
 export class RoundVoting {
   readonly gameCode: string;
@@ -83,7 +84,10 @@ export class RoundVoting {
     return this.#status;
   }
 
-  /** Ids of the candidates who have voted, never who they voted for. */
+  /**
+   * Ids of the candidates who have voted, never who they voted for. Showing
+   * it to a phone gives the impostor away: they are the one missing.
+   */
   get voters(): string[] {
     return [...this.#votes.keys()];
   }
@@ -131,10 +135,13 @@ export class RoundVoting {
     this.#status = "open";
   }
 
-  /** Records a final vote. The last candidate's vote ends the voting. */
+  /** Records a final vote. The vote of the last candidate but the impostor ends the voting. */
   cast(voterId: string, suspectNickname: string): void {
     if (!this.isCandidate(voterId)) {
       throw new NotAPlayerError(voterId);
+    }
+    if (voterId === this.chosenImpostorId) {
+      throw new ImpostorCannotVoteError();
     }
     if (this.#status !== "open") {
       throw new VotingNotOpenError();
@@ -152,7 +159,7 @@ export class RoundVoting {
       throw new SelfVoteError();
     }
     this.#votes.set(voterId, suspect.id);
-    if (this.#votes.size === this.candidates.length) {
+    if (this.#votes.size === this.candidates.length - 1) {
       this.#status = "over";
     }
   }

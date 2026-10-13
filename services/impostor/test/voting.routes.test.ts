@@ -151,16 +151,27 @@ describe("casting a vote", () => {
     expect(res.status).toBe(204);
     await expect(view("ana")).resolves.toMatchObject({
       impostorId: null,
-      voters: ["u3"],
+      voters: [],
       voting: "open",
     });
+    await expect(view("cleo")).resolves.toMatchObject({ voters: ["u3"] });
   });
 
-  it("ends the voting with the last vote", async () => {
+  it("refuses the impostor's vote with 403 and keeps the voting open", async () => {
+    const { open, view, vote } = await setup();
+    await open("ana");
+
+    const res = await vote("beto", "Ana");
+
+    expect(res.status).toBe(403);
+    await expect(code(res)).resolves.toBe("impostor-cannot-vote");
+    await expect(view("ana")).resolves.toMatchObject({ voting: "open" });
+  });
+
+  it("ends the voting with the last vote but the impostor's", async () => {
     const { open, view, vote } = await setup();
     await open("ana");
     await vote("ana", "Beto");
-    await vote("beto", "Ana");
     await vote("cleo", "Beto");
 
     await expect(view("ana")).resolves.toMatchObject({

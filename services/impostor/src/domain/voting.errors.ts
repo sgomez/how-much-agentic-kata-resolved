@@ -68,6 +68,16 @@ export class AlreadyVotedError extends Error {
   }
 }
 
+export class ImpostorCannotVoteError extends Error {
+  readonly kind = "forbidden";
+  readonly code = "impostor-cannot-vote";
+
+  constructor() {
+    super("The impostor of the round does not vote");
+    this.name = "ImpostorCannotVoteError";
+  }
+}
+
 export class SelfVoteError extends Error {
   readonly kind = "invalid";
   readonly code = "self-vote";

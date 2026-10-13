@@ -17,7 +17,7 @@ import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
 import type { SceneScreenProps } from "../../shell/scene.ts";
 import { errorMessage } from "./errors.ts";
-import { useGame, useVoting } from "./use-impostor-round.ts";
+import { useGame, useRoundView, useVoting } from "./use-impostor-round.ts";
 
 /** Screen 07 Voting. The games scene director mounts it while the voting is `open`. */
 export const VotingScreen = ({
@@ -29,6 +29,7 @@ export const VotingScreen = ({
   const { data: session } = authClient.useSession();
   const { data: game } = useGame(gameCode);
   const { data: view } = useVoting(gameCode, round);
+  const { data: roundView } = useRoundView(gameCode, round);
   const queryClient = useQueryClient();
   const [pick, setPick] = useState<string | null>(null);
 
@@ -56,7 +57,12 @@ export const VotingScreen = ({
     />
   );
   const me = session?.user.id;
-  if (game === undefined || view === undefined || me === undefined) {
+  if (
+    game === undefined ||
+    view === undefined ||
+    roundView === undefined ||
+    me === undefined
+  ) {
     return (
       <Screen top={top} banner={banner} overlays={overlays} centered>
         <EmptyState icon="refresh" title="Cargando la votación…" />
@@ -67,14 +73,41 @@ export const VotingScreen = ({
   const isHost = me === game.hostId;
   // After a reload no tile is selected, but our id is in `voters`.
   const voted = view.voters.includes(me);
-  const missing = view.candidates.filter(
-    (c) => !view.voters.includes(c.id)
-  ).length;
+  // Never say who is left to vote: the one left is always the impostor.
   const failure = vote.error ?? close.error;
-  const hint =
-    failure === null
-      ? `${voted ? "Voto enviado. " : ""}Faltan ${missing} por votar`
-      : errorMessage(failure);
+  const sent = voted ? "Voto enviado" : undefined;
+  const hint = failure === null ? sent : errorMessage(failure);
+
+  if (roundView.isImpostor) {
+    return (
+      <Screen
+        top={top}
+        banner={banner}
+        overlays={overlays}
+        centered
+        bottom={
+          isHost ? (
+            <BottomActionBar {...(hint === undefined ? {} : { hint })}>
+              <Button
+                variant="secondary"
+                fullWidth
+                disabled={close.isPending}
+                onClick={() => close.mutate()}
+              >
+                Cerrar votación
+              </Button>
+            </BottomActionBar>
+          ) : undefined
+        }
+      >
+        <EmptyState
+          icon="mask"
+          title="Esta vez no votas"
+          description="Eras el impostor. Cruza los dedos: si no te pillan, te llevas 5 puntos."
+        />
+      </Screen>
+    );
+  }
 
   const send = () => {
     const suspect = view.candidates.find((c) => c.id === pick);
@@ -89,7 +122,7 @@ export const VotingScreen = ({
       banner={banner}
       overlays={overlays}
       bottom={
-        <BottomActionBar hint={hint}>
+        <BottomActionBar {...(hint === undefined ? {} : { hint })}>
           <Stack gap={2}>
             {voted ? (
               <Button size="lg" fullWidth disabled icon="lock">
