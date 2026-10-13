@@ -8,11 +8,17 @@ The rounds of every game: which question each one asks, until when players can e
 
 **Round number**: The position of a round in its game, starting at 1. _Avoid_: Index, turn number
 
-**Deadline**: The moment a round stops taking estimates. Only the deadline ends a round. _Avoid_: Timeout, end time, timer
+**Round length**: How long players of a round have to estimate, set by the game's settings. _Avoid_: Duration, timer
+
+**Deadline**: The moment a round stops taking estimates: the moment the game first asked for the round plus its round length. It is set once and never changes, not even when the game asks for the same round again, and only the deadline ends a round. _Avoid_: Timeout, end time, endsAt
 
 **Estimating**: The phase of a round before its deadline. _Avoid_: Open, active, in progress
 
 **Revealed**: The phase of a round after its deadline, when every player sees its solution. Ending and revealing are the same moment. _Avoid_: Closed, finished, over
+
+**Players of a round**: The players the game had when it asked for the round. Only they can see the round. _Avoid_: Participants, members
+
+**Player's view**: What one player of a round sees of it: the question, its unit and ruler range, the deadline, the phase and, once revealed, the solution. _Avoid_: Round state, screen
 
 **Impostor's view**: What the impostor of a round sees: everything the other players see except the question. The impostor knows they are the impostor as soon as the round appears. _Avoid_: Blind view, hidden question
 
