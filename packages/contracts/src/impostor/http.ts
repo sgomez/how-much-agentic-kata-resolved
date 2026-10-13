@@ -132,8 +132,6 @@ export type CastVoteRequest = z.infer<typeof CastVoteRequest>;
 // POST /:code/:n/voting/close (the host's phone ends the voting even if
 // someone has not voted). No body in the request, 204 with no body in the
 // response. Closing a voting that is already over changes nothing.
-// Open: `close` is a verb, and the fair's rule asks for a POST to a noun. The
-// path is not settled.
 
 /**
  * Codes in `ErrorBody.error.code` returned by this service. The status comes
