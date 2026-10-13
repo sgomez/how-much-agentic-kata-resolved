@@ -76,28 +76,20 @@ export class GetScoreboardQuery {
     accumulatedPoints: Map<string, number>
   ): Promise<void> {
     const cached = await this.#verdicts.get(code, roundNumber);
-    if (cached) {
-      const verdictPoints = scoreVerdict(
-        cached.verdict,
-        cached.impostorId,
-        gamePlayerIds
-      );
-      for (const [playerId, points] of Object.entries(verdictPoints)) {
-        const current = accumulatedPoints.get(playerId) ?? 0;
-        accumulatedPoints.set(playerId, current + points);
+    let resolved = cached;
+
+    if (!resolved) {
+      const res = await this.#impostor.getVerdict(code, roundNumber);
+      if (res.verdict !== null && res.impostorId !== null) {
+        resolved = { impostorId: res.impostorId, verdict: res.verdict };
+        await this.#verdicts.save(code, roundNumber, resolved);
       }
-      return;
     }
 
-    const res = await this.#impostor.getVerdict(code, roundNumber);
-    if (res.verdict !== null && res.impostorId !== null) {
-      await this.#verdicts.save(code, roundNumber, {
-        impostorId: res.impostorId,
-        verdict: res.verdict,
-      });
+    if (resolved) {
       const verdictPoints = scoreVerdict(
-        res.verdict,
-        res.impostorId,
+        resolved.verdict,
+        resolved.impostorId,
         gamePlayerIds
       );
       for (const [playerId, points] of Object.entries(verdictPoints)) {

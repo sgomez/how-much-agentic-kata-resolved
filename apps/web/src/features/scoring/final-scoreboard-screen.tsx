@@ -13,15 +13,15 @@ import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
 import { useView } from "../../shell/use-view.ts";
 
-export interface FinalRankingScreenProps {
+export interface FinalScoreboardScreenProps {
   gameCode: string;
   bottomSlot?: ReactNode;
 }
 
-export const FinalRankingScreen = ({
+export const FinalScoreboardScreen = ({
   gameCode,
   bottomSlot,
-}: FinalRankingScreenProps) => {
+}: FinalScoreboardScreenProps) => {
   const { data: session } = authClient.useSession();
   const youId = session?.user?.id;
 
@@ -53,3 +53,6 @@ export const FinalRankingScreen = ({
     </Screen>
   );
 };
+
+export { FinalScoreboardScreen as FinalRankingScreen };
+export type { FinalScoreboardScreenProps as FinalRankingScreenProps };

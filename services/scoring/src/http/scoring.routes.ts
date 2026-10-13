@@ -43,16 +43,12 @@ export const scoringRoutes =
       }
 
       const { value } = SendEstimateRequest.parse(raw);
-
-      const player =
-        (c.var as unknown as { player?: { id: string }; user?: { id: string } })
-          .player ?? c.var.user;
-      const playerId = player.id;
+      const playerId = c.var.user.id;
 
       const stored = await deps.sendEstimate.execute({
         code,
-        round,
         playerId,
+        round,
         value,
       });
 
@@ -64,23 +60,16 @@ export const scoringRoutes =
       const code = c.req.param("code");
       const round = Math.trunc(Number(c.req.param("n")));
       if (!Number.isInteger(round) || round <= 0) {
-        return c.json(
-          {
-            error: { code: "invalid-request", message: "Invalid round number" },
-          },
-          400
-        );
+        const empty: ListEstimatesResponse = { answered: [], myEstimate: null };
+        return c.json(empty, 200);
       }
 
-      const player =
-        (c.var as unknown as { player?: { id: string }; user?: { id: string } })
-          .player ?? c.var.user;
-      const playerId = player.id;
+      const playerId = c.var.user.id;
 
       const result = await deps.listEstimates.execute({
         code,
-        round,
         playerId,
+        round,
       });
 
       const body: ListEstimatesResponse = result;
@@ -89,10 +78,7 @@ export const scoringRoutes =
 
     app.get("/:code/scoreboard", async (c) => {
       const code = c.req.param("code");
-      const player =
-        (c.var as unknown as { player?: { id: string }; user?: { id: string } })
-          .player ?? c.var.user;
-      const playerId = player.id;
+      const playerId = c.var.user.id;
 
       const result = await deps.getScoreboard.execute(code, playerId);
 
@@ -112,10 +98,7 @@ export const scoringRoutes =
         );
       }
 
-      const player =
-        (c.var as unknown as { player?: { id: string }; user?: { id: string } })
-          .player ?? c.var.user;
-      const playerId = player.id;
+      const playerId = c.var.user.id;
 
       const result = await deps.getReveal.execute({
         askingPlayerId: playerId,

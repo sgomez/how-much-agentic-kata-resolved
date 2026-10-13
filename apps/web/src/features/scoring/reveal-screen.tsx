@@ -22,6 +22,7 @@ import { useView } from "../../shell/use-view.ts";
 export interface RevealScreenProps {
   gameCode: string;
   bottomSlot?: ReactNode;
+  onNavigateToScoreboard?: () => void;
 }
 
 const scoreReason = (points: number): "exact" | "closest" | undefined => {
@@ -73,7 +74,11 @@ const RevealBottom = ({
   </BottomActionBar>
 );
 
-export const RevealScreen = ({ gameCode, bottomSlot }: RevealScreenProps) => {
+export const RevealScreen = ({
+  gameCode,
+  bottomSlot,
+  onNavigateToScoreboard,
+}: RevealScreenProps) => {
   const navigate = useNavigate();
   const { data: session } = authClient.useSession();
   const youId = session?.user?.id;
@@ -85,11 +90,15 @@ export const RevealScreen = ({ gameCode, bottomSlot }: RevealScreenProps) => {
   const currentRound = game?.currentRound ?? null;
 
   const { data: round } = useView(["round", gameCode, currentRound], () =>
-    api<RoundViewResponse>(`/rounds/${gameCode}/${currentRound}`)
+    currentRound === null
+      ? Promise.resolve(null as unknown as RoundViewResponse)
+      : api<RoundViewResponse>(`/rounds/${gameCode}/${currentRound}`)
   );
 
   const { data: reveal } = useView(["reveal", gameCode, currentRound], () =>
-    api<RevealResponse>(`/scoring/${gameCode}/${currentRound}/reveal`)
+    currentRound === null
+      ? Promise.resolve(null as unknown as RevealResponse)
+      : api<RevealResponse>(`/scoring/${gameCode}/${currentRound}/reveal`)
   );
 
   const allEntries = toRevealEntries(game?.players, reveal?.estimates);
@@ -104,6 +113,14 @@ export const RevealScreen = ({ gameCode, bottomSlot }: RevealScreenProps) => {
   const unit = round?.unit ?? "";
   const solution = reveal?.solution ?? 0;
 
+  const handleNavigate = () => {
+    if (onNavigateToScoreboard) {
+      onNavigateToScoreboard();
+    } else {
+      navigate(gameCode ? `/scoreboard/${gameCode}` : "/scoreboard");
+    }
+  };
+
   return (
     <Screen
       top={
@@ -114,12 +131,7 @@ export const RevealScreen = ({ gameCode, bottomSlot }: RevealScreenProps) => {
         />
       }
       bottom={
-        <RevealBottom
-          bottomSlot={bottomSlot}
-          onNavigate={() => {
-            navigate("/scoreboard");
-          }}
-        />
+        <RevealBottom bottomSlot={bottomSlot} onNavigate={handleNavigate} />
       }
     >
       <Stack gap={5}>

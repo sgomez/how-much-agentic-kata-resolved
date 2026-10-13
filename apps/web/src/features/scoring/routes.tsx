@@ -1,16 +1,20 @@
 import type { RouteObject } from "react-router";
+import { useParams } from "react-router";
 
-import { PlaceholderPage } from "../../shell/placeholder-page.tsx";
+import { ScoreboardScreen } from "./scoreboard-screen.tsx";
 
-/**
- * Screens of the scoring group. Add your routes here; the shell mounts them behind
- * the nickname sign-in. Build screens only with @hmk/ui (see packages/ui/COMPONENTS.md;
- * the Patterns/ stories in `pnpm storybook` show each screen put together),
- * fetch views with `useView` and send actions with `api` from src/shell.
- */
+const ScoreboardRoute = () => {
+  const { code } = useParams<{ code?: string }>();
+  return <ScoreboardScreen gameCode={code ?? ""} />;
+};
+
 export const routes: RouteObject[] = [
   {
     path: "/scoreboard",
-    element: <PlaceholderPage title="Marcador" group="scoring" />,
+    element: <ScoreboardRoute />,
+  },
+  {
+    path: "/scoreboard/:code",
+    element: <ScoreboardRoute />,
   },
 ];
