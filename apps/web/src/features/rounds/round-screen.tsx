@@ -81,6 +81,18 @@ export const RoundScreen = ({
     );
   }
 
+  const isTimeUp =
+    roundView.phase === "revealed" ||
+    new Date(roundView.serverNow).getTime() >=
+      new Date(roundView.deadline).getTime();
+
+  let hint: string | undefined;
+  if (isTimeUp) {
+    hint = "Se acabó el tiempo";
+  } else if (value === null) {
+    hint = "Elige un valor en la regla para enviar";
+  }
+
   return (
     <Screen
       top={
@@ -98,15 +110,14 @@ export const RoundScreen = ({
         />
       }
       bottom={
-        <BottomActionBar
-          hint={
-            value === null
-              ? "Elige un valor en la regla para enviar"
-              : undefined
-          }
-        >
-          <Button size="lg" fullWidth icon="send" disabled={value === null}>
-            Enviar
+        <BottomActionBar hint={hint}>
+          <Button
+            size="lg"
+            fullWidth
+            icon={isTimeUp ? "clock" : "send"}
+            disabled={isTimeUp || value === null}
+          >
+            {isTimeUp ? "Se acabó el tiempo" : "Enviar"}
           </Button>
           {bottom}
         </BottomActionBar>
@@ -125,6 +136,7 @@ export const RoundScreen = ({
           scale="auto"
           value={value}
           onChange={setValue}
+          disabled={isTimeUp}
         />
       </Stack>
     </Screen>

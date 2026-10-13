@@ -5,6 +5,7 @@ import type { ServiceApp } from "@hmk/kit";
 import { jwksUrl, urlOf } from "@hmk/kit/topology";
 
 import { CreateRound } from "./application/create-round.use-case.ts";
+import { GetRoundInternal } from "./application/get-round-internal.query.ts";
 import { GetRoundView } from "./application/get-round-view.query.ts";
 import type { CatalogPort } from "./domain/ports/catalog.port.ts";
 import type { ClockPort } from "./domain/ports/clock.port.ts";
@@ -34,11 +35,12 @@ export const composeRounds = ({
   const rounds = new MemoryRoundRepository();
   const createRound = new CreateRound({ catalog, clock, rounds });
   const getRoundView = new GetRoundView({ clock, rounds });
+  const getRoundInternal = new GetRoundInternal({ clock, rounds });
 
   return createService({
     log,
     name: "rounds",
-    routes: [roundsRoutes({ createRound, getRoundView })],
+    routes: [roundsRoutes({ createRound, getRoundInternal, getRoundView })],
     verifier,
   });
 };
