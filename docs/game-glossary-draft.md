@@ -11,8 +11,7 @@
 
 ## Rounds
 
-- **Closing a round early**: Can the host close a round before its deadline? If so, Rounds must tell Impostor the new deadline.
-- **Ruler scale and step**: The ruler range, the scale and, if needed, the step come from the catalog, and Rounds copies them. Today the catalog's question has a ruler range but no scale or step. Changing the catalog is a shared change, through a PR.
+- **Ruler scale and step**: The ruler range, the scale and, if needed, the step come from the catalog, and Rounds copies them. Today the catalog's question has a ruler range but no scale or step. Changing the catalog is a shared change, through a PR. Until then, the round screen picks the scale from the ruler range and takes any number in it.
 
 ## Scoring
 
