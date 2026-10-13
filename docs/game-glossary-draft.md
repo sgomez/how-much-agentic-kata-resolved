@@ -21,7 +21,7 @@
 
 ## Impostor
 
-- **Hiding the solution until after the vote**: In the original game, impostor rounds reveal the estimates without the solution, and the solution only after the vote. For now the solution is shown at the reveal, like in any round. Do we hide it?
+- **Hiding the solution until after the vote**: In the original game, impostor rounds reveal the estimates without the solution, and the solution only after the vote. For now the solution is shown at the reveal, like in any round. Do we hide it? Impostor decides once Scoring says what it would cost their reveal (questionnaire sent after the contract fair).
 
 ## Not discussed in the plenary
 
