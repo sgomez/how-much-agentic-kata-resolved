@@ -33,5 +33,3 @@ export class GetRoundInternal {
     return round.internalViewFor(input.playerId, now);
   }
 }
-
-export { GetRoundInternal as GetRoundInternalQuery };

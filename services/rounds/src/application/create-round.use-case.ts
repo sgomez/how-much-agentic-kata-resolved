@@ -26,13 +26,13 @@ export class CreateRound {
   readonly #rounds: RoundRepository;
   readonly #catalog: CatalogPort;
   readonly #clock: ClockPort;
-  readonly #impostor?: ImpostorPort;
+  readonly #impostor: ImpostorPort;
 
   constructor(deps: {
     rounds: RoundRepository;
     catalog: CatalogPort;
     clock: ClockPort;
-    impostor?: ImpostorPort;
+    impostor: ImpostorPort;
   }) {
     this.#rounds = deps.rounds;
     this.#catalog = deps.catalog;
@@ -51,9 +51,6 @@ export class CreateRound {
     }
 
     if (existing && !existing.isComplete()) {
-      if (!this.#impostor) {
-        throw new Error("Impostor port is required in impostor mode");
-      }
       const impostorId = await this.#impostor.chooseImpostor(
         input.gameCode,
         input.roundNumber,
@@ -77,12 +74,12 @@ export class CreateRound {
       throw new WrongRoundNumberError(expectedNumber, input.roundNumber);
     }
 
+    const now = this.#clock.now();
     const question = await this.#catalog.drawQuestion(
       input.gameCode,
       input.packs
     );
 
-    const now = this.#clock.now();
     const round = Round.create({
       gameCode: input.gameCode,
       hostId: input.hostId,
@@ -95,9 +92,6 @@ export class CreateRound {
     });
 
     if (input.impostorMode) {
-      if (!this.#impostor) {
-        throw new Error("Impostor port is required in impostor mode");
-      }
       // Step 2: Reserve round with question and deadline
       await this.#rounds.save(round);
 

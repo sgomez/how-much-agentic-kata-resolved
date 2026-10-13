@@ -148,7 +148,7 @@ describe(RoundScreen, () => {
     expect(html).toContain("han respondido");
   });
 
-  it("renders disabled Cambiar button when estimate was already sent", () => {
+  it("renders AfterSendingScreen when estimate was already sent", () => {
     const queryClient = createTestQueryClient();
     queryClient.setQueryData(["games", "ABCD"], mockGame);
     queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
@@ -159,9 +159,10 @@ describe(RoundScreen, () => {
 
     const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
 
-    expect(html).toContain("Cambiar");
+    expect(html).toContain("Tu estimación");
+    expect(html).toContain("21.000");
+    expect(html).toContain("Cambiar mi estimación");
     expect(html).not.toContain("Enviar");
-    expect(html).toContain("disabled");
   });
 
   it("disables ruler and shows time-up hint when deadline has passed", () => {

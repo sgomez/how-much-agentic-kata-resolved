@@ -13,14 +13,13 @@ import type { ImpostorPort } from "./domain/ports/impostor.port.ts";
 import { roundsRoutes } from "./http/rounds.routes.ts";
 import { CatalogHttpAdapter } from "./infra/catalog-http.adapter.ts";
 import { ImpostorHttpAdapter } from "./infra/impostor-http.adapter.ts";
-import { MemoryImpostorAdapter } from "./infra/memory-impostor.adapter.ts";
 import { MemoryRoundRepository } from "./infra/memory-round-repository.adapter.ts";
 import { SystemClock } from "./infra/system-clock.adapter.ts";
 
 export interface RoundsDeps {
   verifier: TokenVerifier;
   catalog: CatalogPort;
-  impostor?: ImpostorPort;
+  impostor: ImpostorPort;
   clock?: ClockPort;
   log?: boolean;
 }
@@ -33,7 +32,7 @@ export interface RoundsDeps {
 export const composeRounds = ({
   verifier,
   catalog,
-  impostor = new MemoryImpostorAdapter(),
+  impostor,
   clock = new SystemClock(),
   log,
 }: RoundsDeps): ServiceApp => {

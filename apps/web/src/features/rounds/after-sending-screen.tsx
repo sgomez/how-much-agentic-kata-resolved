@@ -23,18 +23,14 @@ import { useView } from "../../shell/use-view.ts";
 export interface AfterSendingScreenProps {
   gameCode: string;
   bottomSlot?: ReactNode;
-  bottomAction?: ReactNode;
   onEdit?: () => void;
 }
 
 export const AfterSendingScreen = ({
   gameCode,
   bottomSlot,
-  bottomAction,
   onEdit,
 }: AfterSendingScreenProps) => {
-  const bottom = bottomSlot ?? bottomAction;
-
   const { data: game } = useView<GameView | null>(
     ["games", gameCode],
     async () => {
@@ -93,7 +89,9 @@ export const AfterSendingScreen = ({
       <Screen
         top={<TopBar gameCode={gameCode} />}
         bottom={
-          bottom ? <BottomActionBar>{bottom}</BottomActionBar> : undefined
+          bottomSlot ? (
+            <BottomActionBar>{bottomSlot}</BottomActionBar>
+          ) : undefined
         }
       >
         <Stack gap={4}>
@@ -105,6 +103,11 @@ export const AfterSendingScreen = ({
   }
 
   const sentValue = estimates.myEstimate;
+  const isTimeUp =
+    roundView.phase === "revealed" ||
+    new Date(roundView.serverNow).getTime() >=
+      new Date(roundView.deadline).getTime();
+
   const trackerPlayers = (game.players ?? []).map((p) => ({
     id: p.id,
     name: p.nickname,
@@ -124,6 +127,16 @@ export const AfterSendingScreen = ({
     (game.players ?? []).length > 0 &&
     (game.players ?? []).every((p) => estimates.answered.includes(p.id));
 
+  const bottomHint = () => {
+    if (isTimeUp) {
+      return "Se acabó el tiempo";
+    }
+    if (everyoneIn) {
+      return;
+    }
+    return "Puedes cambiarla hasta que acabe el tiempo";
+  };
+
   return (
     <Screen
       top={
@@ -141,23 +154,18 @@ export const AfterSendingScreen = ({
         />
       }
       bottom={
-        <BottomActionBar
-          hint={
-            everyoneIn
-              ? undefined
-              : "Puedes cambiarla hasta que acabe el tiempo"
-          }
-        >
+        <BottomActionBar hint={bottomHint()}>
           <Button
             size="lg"
             fullWidth
             variant="secondary"
             icon="pencil"
+            disabled={isTimeUp}
             onClick={onEdit}
           >
             Cambiar mi estimación
           </Button>
-          {bottom}
+          {bottomSlot}
         </BottomActionBar>
       }
     >
@@ -178,11 +186,15 @@ export const AfterSendingScreen = ({
           <Text size="sm" tone="muted">
             Tu estimación
           </Text>
-          <span className="condensed text-estimate text-ink leading-none font-extrabold">
+          <Text
+            as="span"
+            weight="bold"
+            className="condensed text-estimate text-ink leading-none font-extrabold"
+          >
             {sentValue !== null && sentValue !== undefined
               ? formatNumber(sentValue)
               : "—"}
-          </span>
+          </Text>
           {roundView.unit ? <Text tone="muted">{roundView.unit}</Text> : null}
         </Stack>
         <AnswerTracker players={trackerPlayers} />
