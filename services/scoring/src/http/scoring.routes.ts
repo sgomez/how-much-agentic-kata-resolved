@@ -1,10 +1,12 @@
 import { SendEstimateRequest } from "@hmk/contracts/scoring";
 import type {
   ListEstimatesResponse,
+  ScoreboardResponse,
   SendEstimateResponse,
 } from "@hmk/contracts/scoring";
 import type { ServiceApp } from "@hmk/kit";
 
+import type { GetScoreboardQuery } from "../application/get-scoreboard.query.ts";
 import type { ListEstimates } from "../application/list-estimates.query.ts";
 import type { SendEstimate } from "../application/send-estimate.use-case.ts";
 
@@ -12,6 +14,7 @@ export const scoringRoutes =
   (deps: {
     sendEstimate: Pick<SendEstimate, "execute">;
     listEstimates: Pick<ListEstimates, "execute">;
+    getScoreboard: Pick<GetScoreboardQuery, "execute">;
   }) =>
   (app: ServiceApp): void => {
     app.post("/:code/:n/estimates", async (c) => {
@@ -78,6 +81,19 @@ export const scoringRoutes =
       });
 
       const body: ListEstimatesResponse = result;
+      return c.json(body, 200);
+    });
+
+    app.get("/:code/scoreboard", async (c) => {
+      const code = c.req.param("code");
+      const player =
+        (c.var as unknown as { player?: { id: string }; user?: { id: string } })
+          .player ?? c.var.user;
+      const playerId = player.id;
+
+      const result = await deps.getScoreboard.execute(code, playerId);
+
+      const body: ScoreboardResponse = result;
       return c.json(body, 200);
     });
   };

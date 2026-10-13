@@ -4,16 +4,25 @@ import { createService, createServiceClient } from "@hmk/kit";
 import type { ServiceApp } from "@hmk/kit";
 import { jwksUrl, urlOf } from "@hmk/kit/topology";
 
+import { GetScoreboardQuery } from "./application/get-scoreboard.query.ts";
 import { ListEstimates } from "./application/list-estimates.query.ts";
 import { SendEstimate } from "./application/send-estimate.use-case.ts";
+import type { GamesPort } from "./domain/ports/games.port.ts";
 import type { RoundsPort } from "./domain/ports/rounds.port.ts";
+import type { RevealedRoundsRepository } from "./domain/revealed-rounds.repository.ts";
 import { scoringRoutes } from "./http/scoring.routes.ts";
+import { GamesHttpAdapter } from "./infra/games-http.adapter.ts";
 import { MemoryEstimatesRepository } from "./infra/memory-estimates-repository.adapter.ts";
+import { MemoryGamesAdapter } from "./infra/memory-games.adapter.ts";
+import { MemoryRevealedRoundsAdapter } from "./infra/memory-revealed-rounds.adapter.ts";
+import { MemoryRoundsAdapter } from "./infra/memory-rounds.adapter.ts";
 import { RoundsHttpAdapter } from "./infra/rounds-http.adapter.ts";
 
 export interface ScoringDeps {
   verifier: TokenVerifier;
-  rounds: RoundsPort;
+  rounds?: RoundsPort;
+  games?: GamesPort;
+  revealedRounds?: RevealedRoundsRepository;
   log?: boolean;
 }
 
@@ -24,17 +33,25 @@ export interface ScoringDeps {
  */
 export const composeScoring = ({
   verifier,
-  rounds,
+  rounds = new MemoryRoundsAdapter(),
+  games = new MemoryGamesAdapter(),
+  revealedRounds = new MemoryRevealedRoundsAdapter(),
   log,
 }: ScoringDeps): ServiceApp => {
   const estimates = new MemoryEstimatesRepository();
   const sendEstimate = new SendEstimate({ estimates, rounds });
   const listEstimates = new ListEstimates({ estimates });
+  const getScoreboard = new GetScoreboardQuery({
+    estimates,
+    games,
+    revealedRounds,
+    rounds,
+  });
 
   return createService({
     log,
     name: "scoring",
-    routes: [scoringRoutes({ listEstimates, sendEstimate })],
+    routes: [scoringRoutes({ getScoreboard, listEstimates, sendEstimate })],
     verifier,
   });
 };
@@ -42,6 +59,7 @@ export const composeScoring = ({
 /** The service wired with its real adapters, configured from the environment. */
 export const composeScoringFromEnv = (_env: NodeJS.ProcessEnv): ServiceApp =>
   composeScoring({
+    games: new GamesHttpAdapter(createServiceClient(urlOf("games"))),
     log: true,
     rounds: new RoundsHttpAdapter(createServiceClient(urlOf("rounds"))),
     verifier: createJwksVerifier(jwksUrl()),

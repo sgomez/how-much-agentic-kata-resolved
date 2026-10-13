@@ -20,8 +20,7 @@ import { z } from "zod";
  * - `round-not-found` (404) and `not-a-player` (403): from rounds, passed through as they are.
  * - `unknown-code` (404): from games, passed through as it is.
  *
- * Open: the actas say "502 if games, rounds or impostor do not answer", but
- * no code was agreed and `@hmk/kit` answers 500 `internal` today.
+ * If a dependency (games, rounds, impostor) fails or does not answer, `@hmk/kit` answers 500 `internal`.
  */
 export const ScoringErrorCode = z.enum([
   "unauthenticated",
@@ -106,10 +105,8 @@ export type RevealResponse = z.infer<typeof RevealResponse>;
  *
  * Every player of the game with the points added up over its revealed rounds
  * and finished votings, computed on each read. Everyone sees the same list.
- * Errors: 404 `unknown-code`, 401 `unauthenticated`.
- *
- * Open: the acta with games says "not secret, no 403", but rounds answers
- * 403 `not-a-player` to the forwarded token. Which one holds? (scoring decides)
+ * Only players of the game can view the scoreboard.
+ * Errors: 404 `unknown-code`, 403 `not-a-player`, 401 `unauthenticated`.
  */
 export const ScoreboardResponse = z.object({
   /** Sorted by points, highest first; ties keep the order in which players joined. */
