@@ -12,8 +12,8 @@ import {
 
 import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useView } from "../../shell/use-view.ts";
-import type { SceneScreenProps } from "./scene-screen-props.ts";
 
 const settingsRows = ({ settings }: GameView) => [
   { label: "Rondas", value: String(settings.rounds) },
@@ -31,7 +31,7 @@ export const LobbyScreen = ({
   bottom,
   banner,
   overlays,
-}: SceneScreenProps) => {
+}: Omit<SceneScreenProps, "round">) => {
   const { data: session } = authClient.useSession();
   const { data: view } = useView(["game", code], () =>
     api<GameView>(`/games/${code}`)

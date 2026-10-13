@@ -15,24 +15,25 @@ import {
   TopBar,
   formatNumber,
 } from "@hmk/ui";
-import type { ReactNode } from "react";
 
 import { ApiError, api } from "../../shell/api.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useView } from "../../shell/use-view.ts";
 
-export interface AfterSendingScreenProps {
-  gameCode: string;
-  bottomSlot?: ReactNode;
+export interface AfterSendingScreenProps extends SceneScreenProps {
   onEdit?: () => void;
 }
 
 export const AfterSendingScreen = ({
-  gameCode,
-  bottomSlot,
+  code: gameCode,
+  round: currentRound,
+  bottom,
+  banner,
+  overlays,
   onEdit,
 }: AfterSendingScreenProps) => {
   const { data: game } = useView<GameView | null>(
-    ["games", gameCode],
+    ["game", gameCode],
     async () => {
       try {
         return await api<GameView>(`/games/${gameCode}`);
@@ -45,13 +46,9 @@ export const AfterSendingScreen = ({
     }
   );
 
-  const currentRound = game?.currentRound;
   const { data: roundView } = useView<RoundViewResponse | null>(
-    ["rounds", gameCode, currentRound],
+    ["round", gameCode, currentRound],
     async () => {
-      if (currentRound === null || currentRound === undefined) {
-        return null;
-      }
       try {
         return await api<RoundViewResponse>(
           `/rounds/${gameCode}/${currentRound}`
@@ -68,9 +65,6 @@ export const AfterSendingScreen = ({
   const { data: estimates } = useView<ListEstimatesResponse | null>(
     ["scoring", gameCode, currentRound],
     async () => {
-      if (currentRound === null || currentRound === undefined) {
-        return null;
-      }
       try {
         return await api<ListEstimatesResponse>(
           `/scoring/${gameCode}/${currentRound}/estimates`
@@ -84,15 +78,13 @@ export const AfterSendingScreen = ({
     }
   );
 
-  if (!game || !currentRound || !roundView || !estimates) {
+  if (!game || !roundView || !estimates) {
     return (
       <Screen
         top={<TopBar gameCode={gameCode} />}
-        bottom={
-          bottomSlot ? (
-            <BottomActionBar>{bottomSlot}</BottomActionBar>
-          ) : undefined
-        }
+        bottom={bottom}
+        banner={banner}
+        overlays={overlays}
       >
         <Stack gap={4}>
           <Skeleton shape="block" height={120} />
@@ -165,9 +157,11 @@ export const AfterSendingScreen = ({
           >
             Cambiar mi estimación
           </Button>
-          {bottomSlot}
+          {bottom}
         </BottomActionBar>
       }
+      banner={banner}
+      overlays={overlays}
     >
       <Stack gap={5}>
         <Stack

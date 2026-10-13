@@ -159,7 +159,6 @@ export const GamePage = () => {
       if (action === "start") {
         await api(`/games/${code}/start`, { method: "POST" });
       } else if (action === "open-voting") {
-        // Until impostor exports its "Abrir votación" action.
         await api(`/impostor/${code}/${game.currentRound}/voting`, {
           method: "POST",
         });
@@ -200,6 +199,7 @@ export const GamePage = () => {
     <SceneScreenView
       screen={scene.screen}
       code={code}
+      round={game.currentRound}
       bottom={bottom}
       banner={banner}
       overlays={

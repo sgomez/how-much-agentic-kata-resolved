@@ -15,14 +15,19 @@ import { useState } from "react";
 
 import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { errorMessage } from "./errors.ts";
 import { useGame, useVoting } from "./use-impostor-round.ts";
 
-/** Screen 07 Voting. The games scene director mounts it with the game code, from `open`. */
-export const VotingScreen = ({ gameCode }: { gameCode: string }) => {
+/** Screen 07 Voting. The games scene director mounts it while the voting is `open`. */
+export const VotingScreen = ({
+  code: gameCode,
+  round,
+  banner,
+  overlays,
+}: SceneScreenProps) => {
   const { data: session } = authClient.useSession();
   const { data: game } = useGame(gameCode);
-  const round = game?.currentRound ?? null;
   const { data: view } = useVoting(gameCode, round);
   const queryClient = useQueryClient();
   const [pick, setPick] = useState<string | null>(null);
@@ -46,19 +51,14 @@ export const VotingScreen = ({ gameCode }: { gameCode: string }) => {
   const top = (
     <TopBar
       gameCode={gameCode}
-      {...(round === null ? {} : { round })}
+      round={round}
       {...(game === undefined ? {} : { totalRounds: game.settings.rounds })}
     />
   );
   const me = session?.user.id;
-  if (
-    game === undefined ||
-    view === undefined ||
-    view === null ||
-    me === undefined
-  ) {
+  if (game === undefined || view === undefined || me === undefined) {
     return (
-      <Screen top={top} centered>
+      <Screen top={top} banner={banner} overlays={overlays} centered>
         <EmptyState icon="refresh" title="Cargando la votación…" />
       </Screen>
     );
@@ -86,6 +86,8 @@ export const VotingScreen = ({ gameCode }: { gameCode: string }) => {
   return (
     <Screen
       top={top}
+      banner={banner}
+      overlays={overlays}
       bottom={
         <BottomActionBar hint={hint}>
           <Stack gap={2}>

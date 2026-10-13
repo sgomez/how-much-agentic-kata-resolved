@@ -16,13 +16,8 @@ import { useNavigate } from "react-router";
 import { api } from "./api.ts";
 import { authClient } from "./auth-client.ts";
 
-/** Placeholder entry point: one link per group's screens, plus a system check. */
-const SCREENS = [
-  { to: "/games", label: "Partidas", group: "games" },
-  { to: "/round", label: "Ronda", group: "rounds" },
-  { to: "/scoreboard", label: "Marcador", group: "scoring" },
-  { to: "/impostor", label: "Impostor", group: "impostor" },
-] as const;
+/** Entry point: the games page (the scene director mounts every other screen from there), plus a system check. */
+const SCREENS = [{ to: "/games", label: "Partidas" }] as const;
 
 const CatalogStatus = () => {
   const { data, isError, isPending } = useQuery({

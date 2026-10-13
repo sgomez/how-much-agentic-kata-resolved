@@ -9,19 +9,19 @@ import type { ScoringDriver } from "../dsl/drivers.ts";
 // Owned by the scoring group: replace each `pending(...)` with calls through `player.http`.
 export const scoringDriver: ScoringDriver = {
   estimate: async (player, code, value) => {
-    const game = await player.http.get(`/api/games/${code}`, GameView);
+    const game = await player.http.get(`/games/${code}`, GameView);
     if (!game.currentRound) {
       throw new Error(`Game ${code} has no current round`);
     }
     await player.http.post(
-      `/api/scoring/${code}/${game.currentRound}/estimates`,
+      `/scoring/${code}/${game.currentRound}/estimates`,
       { value },
       SendEstimateResponse
     );
   },
   scoreboard: async (player, code) => {
     const res = await player.http.get(
-      `/api/scoring/${code}/scoreboard`,
+      `/scoring/${code}/scoreboard`,
       ScoreboardResponse
     );
     return res.players.map((p) => ({

@@ -58,13 +58,16 @@ const mockRound: RoundViewResponse = {
 describe(RoundScreen, () => {
   it("renders loading state when currentRound is null or round is not found", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], {
+    queryClient.setQueryData(["game", "ABCD"], {
       ...mockGame,
       phase: "lobby",
       currentRound: null,
     });
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("ABCD");
     expect(html).toContain("animate-shimmer");
@@ -72,7 +75,10 @@ describe(RoundScreen, () => {
 
   it("renders loading state when game view is missing or loading", () => {
     const queryClient = createTestQueryClient();
-    const html = renderWithClient(<RoundScreen gameCode="WXYZ" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="WXYZ" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("WXYZ");
     expect(html).toContain("animate-shimmer");
@@ -80,10 +86,13 @@ describe(RoundScreen, () => {
 
   it("renders top bar with round info and countdown timer", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("ABCD");
     expect(html).toContain("Ronda");
@@ -94,13 +103,14 @@ describe(RoundScreen, () => {
 
   it("renders question card, ruler and bottom action bar with optional slot", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
 
     const html = renderWithClient(
       <RoundScreen
-        gameCode="ABCD"
-        bottomSlot={<button type="button">Siguiente ronda</button>}
+        code="ABCD"
+        round={1}
+        bottom={<button type="button">Siguiente ronda</button>}
       />,
       queryClient
     );
@@ -114,17 +124,20 @@ describe(RoundScreen, () => {
 
   it("renders impostor view without question text", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], {
+    queryClient.setQueryData(["game", "ABCD"], {
       ...mockGame,
       settings: { ...mockGame.settings, impostorMode: true },
     });
-    queryClient.setQueryData(["rounds", "ABCD", 1], {
+    queryClient.setQueryData(["round", "ABCD", 1], {
       ...mockRound,
       question: null,
       isImpostor: true,
     });
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("Eres el impostor. Disimula.");
     expect(html).toContain("km");
@@ -134,14 +147,17 @@ describe(RoundScreen, () => {
 
   it("renders AnswerTracker in bottom action bar using scoring estimates", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], {
       answered: ["host-1"],
       myEstimate: null,
     });
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("1");
     expect(html).toContain("2");
@@ -150,14 +166,17 @@ describe(RoundScreen, () => {
 
   it("renders AfterSendingScreen when estimate was already sent", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], {
       answered: ["host-1"],
       myEstimate: 21_000,
     });
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain("Tu estimación");
     expect(html).toContain("21.000");
@@ -167,14 +186,17 @@ describe(RoundScreen, () => {
 
   it("disables ruler and shows time-up hint when deadline has passed", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], {
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], {
       ...mockRound,
       phase: "revealed",
       solution: 21_196,
     });
 
-    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+    const html = renderWithClient(
+      <RoundScreen code="ABCD" round={1} />,
+      queryClient
+    );
 
     expect(html).toContain('aria-disabled="true"');
     expect(html).toContain("Se acabó el tiempo");

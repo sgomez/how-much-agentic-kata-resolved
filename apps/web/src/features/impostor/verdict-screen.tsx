@@ -1,7 +1,5 @@
 import {
   Avatar,
-  BottomActionBar,
-  Button,
   Card,
   EmptyState,
   Heading,
@@ -12,8 +10,8 @@ import {
   TopBar,
   VerdictCard,
 } from "@hmk/ui";
-import { useNavigate } from "react-router";
 
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useGame, useVoting } from "./use-impostor-round.ts";
 
 /** Points an impostor who escapes gets (Scoring's rule, as answered). */
@@ -22,28 +20,27 @@ const ESCAPED_IMPOSTOR_POINTS = 5;
 const CATCHING_BONUS = 2;
 
 /** Screen 08 Verdict: who the impostor was, whether they were caught, and the points that come with it. */
-export const VerdictScreen = ({ code }: { code: string }) => {
-  const navigate = useNavigate();
+export const VerdictScreen = ({
+  code,
+  round,
+  bottom,
+  banner,
+  overlays,
+}: SceneScreenProps) => {
   const { data: game } = useGame(code);
-  const round = game?.currentRound ?? null;
   const { data: view } = useVoting(code, round);
 
   const top = (
     <TopBar
       gameCode={code}
-      {...(round === null ? {} : { round })}
+      round={round}
       {...(game === undefined ? {} : { totalRounds: game.settings.rounds })}
     />
   );
   const impostor = view?.candidates.find((c) => c.id === view.impostorId);
-  if (
-    view === undefined ||
-    view === null ||
-    view.voting !== "over" ||
-    impostor === undefined
-  ) {
+  if (view === undefined || view.voting !== "over" || impostor === undefined) {
     return (
-      <Screen top={top} centered>
+      <Screen top={top} banner={banner} overlays={overlays} centered>
         <EmptyState icon="refresh" title="Cargando el veredicto…" />
       </Screen>
     );
@@ -56,22 +53,7 @@ export const VerdictScreen = ({ code }: { code: string }) => {
     : [];
 
   return (
-    <Screen
-      top={top}
-      bottom={
-        <BottomActionBar>
-          {/* Local navigation: only this phone moves to the scoreboard. */}
-          <Button
-            size="lg"
-            fullWidth
-            icon="arrow-right"
-            onClick={() => navigate("/scoreboard")}
-          >
-            Ver clasificación
-          </Button>
-        </BottomActionBar>
-      }
-    >
+    <Screen top={top} bottom={bottom} banner={banner} overlays={overlays}>
       <Stack gap={5}>
         <VerdictCard
           outcome={caught ? "caught" : "escaped"}
