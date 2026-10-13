@@ -1,5 +1,6 @@
 import { GameView } from "@hmk/contracts/games";
 import { RoundViewResponse } from "@hmk/contracts/rounds";
+import { ListEstimatesResponse } from "@hmk/contracts/scoring";
 
 import type { Player, RoundScreen, RoundsDriver } from "../dsl/drivers.ts";
 
@@ -23,10 +24,23 @@ export const roundsDriver: RoundsDriver = {
     }
 
     const round = RoundViewResponse.parse(res.body);
+
+    let myEstimate: number | null = null;
+    const scoringRes = await player.http.request(
+      "GET",
+      `/scoring/${code}/${game.currentRound}/estimates`
+    );
+    if (scoringRes.status === 200) {
+      const { myEstimate: parsedEstimate } = ListEstimatesResponse.parse(
+        scoringRes.body
+      );
+      myEstimate = parsedEstimate;
+    }
+
     return {
       max: round.max,
       min: round.min,
-      myEstimate: null,
+      myEstimate,
       number: round.number,
       phase: round.phase,
       question: round.question,

@@ -131,4 +131,50 @@ describe(RoundScreen, () => {
     expect(html).not.toContain("¿Cuántos kilómetros mide");
     expect(html).toContain('role="slider"');
   });
+
+  it("renders AnswerTracker in bottom action bar using scoring estimates", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(["games", "ABCD"], mockGame);
+    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["scoring", "ABCD", 1], {
+      answered: ["host-1"],
+      myEstimate: null,
+    });
+
+    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+
+    expect(html).toContain("1");
+    expect(html).toContain("2");
+    expect(html).toContain("han respondido");
+  });
+
+  it("renders disabled Cambiar button when estimate was already sent", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(["games", "ABCD"], mockGame);
+    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["scoring", "ABCD", 1], {
+      answered: ["host-1"],
+      myEstimate: 21_000,
+    });
+
+    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+
+    expect(html).toContain("Cambiar");
+    expect(html).not.toContain("Enviar");
+    expect(html).toContain("disabled");
+  });
+
+  it("renders disabled time up button when round is revealed", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(["games", "ABCD"], mockGame);
+    queryClient.setQueryData(["rounds", "ABCD", 1], {
+      ...mockRound,
+      phase: "revealed",
+    });
+
+    const html = renderWithClient(<RoundScreen gameCode="ABCD" />, queryClient);
+
+    expect(html).toContain("Se acabó el tiempo");
+    expect(html).toContain("disabled");
+  });
 });
