@@ -4,12 +4,14 @@ import type { ServiceApp } from "@hmk/kit";
 
 import type { CreateGame } from "../application/create-game.use-case.ts";
 import type { GetGameView } from "../application/game-view.query.ts";
+import type { StartGame } from "../application/start-game.use-case.ts";
 
 /** Public API of the games service, mounted by the gateway under `/api/games`. */
 export const gamesRoutes =
   (deps: {
     createGame: Pick<CreateGame, "execute">;
     gameView: Pick<GetGameView, "execute">;
+    startGame: Pick<StartGame, "execute">;
   }) =>
   (app: ServiceApp): void => {
     app.post("/", async (c) => {
@@ -22,6 +24,14 @@ export const gamesRoutes =
       });
       const body: CreateGameResponse = { code };
       return c.json(body, 201);
+    });
+
+    app.post("/:code/start", async (c) => {
+      await deps.startGame.execute({
+        code: c.req.param("code"),
+        playerId: c.var.user.id,
+      });
+      return c.body(null, 204);
     });
 
     app.get("/:code", async (c) => {

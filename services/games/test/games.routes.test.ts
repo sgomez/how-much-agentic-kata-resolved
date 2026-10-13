@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { composeGames } from "../src/composition.ts";
 import { FixedCodeGenerator } from "../src/infra/fixed-code-generator.adapter.ts";
+import { MemoryRounds } from "../src/infra/memory-rounds.adapter.ts";
 
 const verifier = createStaticVerifier({
   "ana-token": { id: "u1", name: "Ana" },
@@ -11,7 +12,11 @@ const verifier = createStaticVerifier({
 const auth = { authorization: "Bearer ana-token" };
 
 const games = (codes: readonly string[] = ["KQZT"]) =>
-  composeGames({ codes: new FixedCodeGenerator(codes), verifier });
+  composeGames({
+    codes: new FixedCodeGenerator(codes),
+    rounds: new MemoryRounds(),
+    verifier,
+  });
 
 const post = (body: unknown) => ({
   body: JSON.stringify(body),

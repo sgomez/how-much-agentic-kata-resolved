@@ -1,3 +1,9 @@
+import {
+  GameAlreadyStartedError,
+  NotEnoughPlayersError,
+  NotTheHostError,
+} from "./game.errors.ts";
+
 export interface Player {
   readonly id: string;
   readonly nickname: string;
@@ -36,6 +42,52 @@ export class Game {
   /** A game in the lobby whose only player is its host. */
   static create(code: string, host: Player, settings: Settings): Game {
     return new Game(code, host, settings);
+  }
+
+  /** Rebuilds a game as it was stored. */
+  static restore(state: {
+    code: string;
+    host: Player;
+    settings: Settings;
+    phase: Phase;
+    currentRound: number | null;
+    players: readonly Player[];
+  }): Game {
+    const game = new Game(state.code, state.host, state.settings);
+    game.#players.splice(0, game.#players.length, ...state.players);
+    game.#phase = state.phase;
+    game.#currentRound = state.currentRound;
+    return game;
+  }
+
+  /** Players needed to start: two, or three in impostor mode. */
+  get minimumPlayers(): number {
+    return this.settings.impostorMode ? 3 : 2;
+  }
+
+  /**
+   * Checks in this order of precedence.
+   * @throws {NotTheHostError} when `playerId` is not the host.
+   * @throws {GameAlreadyStartedError} when the game left the lobby.
+   * @throws {NotEnoughPlayersError} below the minimum of players.
+   */
+  assertCanStart(playerId: string): void {
+    if (playerId !== this.host.id) {
+      throw new NotTheHostError();
+    }
+    if (this.#phase !== "lobby") {
+      throw new GameAlreadyStartedError();
+    }
+    if (this.#players.length < this.minimumPlayers) {
+      throw new NotEnoughPlayersError(this.minimumPlayers);
+    }
+  }
+
+  /** The host starts the game: it plays round 1. Same errors as `assertCanStart`. */
+  start(playerId: string): void {
+    this.assertCanStart(playerId);
+    this.#phase = "playing";
+    this.#currentRound = 1;
   }
 
   get phase(): Phase {

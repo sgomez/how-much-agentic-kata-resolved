@@ -12,6 +12,7 @@ import { useView } from "../../shell/use-view.ts";
 import { chooseScene } from "./scene-director.ts";
 import type { SceneAction } from "./scene-director.ts";
 import { SceneScreenView } from "./scene-screens.tsx";
+import { startHint } from "./start-hint.ts";
 
 const actionLabels: Record<SceneAction, string> = {
   start: "Empezar",
@@ -24,6 +25,9 @@ const errorMessages: Record<string, string> = {
   "voting-not-over": "La votación aún no ha terminado",
   "round-not-revealed": "La ronda aún no se ha revelado",
   "not-enough-players": "Faltan jugadores para empezar",
+  "deck-exhausted": "No quedan preguntas para empezar la partida",
+  "game-already-started": "La partida ya ha empezado",
+  "not-the-host": "Solo quien creó la partida puede empezarla",
   "wrong-round": "La partida ya ha avanzado",
 };
 
@@ -81,6 +85,7 @@ export const GamePage = () => {
   const { data: session } = authClient.useSession();
   const [seenRound, setSeenRound] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const { game, gameError, roundPhase, votingStatus } = useGameViews(code);
 
@@ -110,11 +115,16 @@ export const GamePage = () => {
   });
 
   const run = async (action: SceneAction) => {
+    if (action === "view-scoreboard") {
+      setSeenRound(game.currentRound);
+      return;
+    }
+    // A double tap must not send the action twice.
+    if (busy) {
+      return;
+    }
+    setBusy(true);
     try {
-      if (action === "view-scoreboard") {
-        setSeenRound(game.currentRound);
-        return;
-      }
       if (action === "start") {
         await api(`/games/${code}/start`, { method: "POST" });
       } else if (action === "open-voting") {
@@ -136,13 +146,26 @@ export const GamePage = () => {
           : "Algo ha fallado. Inténtalo de nuevo."
       );
     }
+    setBusy(false);
   };
 
   const { action } = scene;
+  const hint =
+    action === "start"
+      ? startHint({
+          impostorMode: game.settings.impostorMode,
+          players: game.players.length,
+        })
+      : null;
   const bottom =
     action === null ? undefined : (
-      <BottomActionBar>
-        <Button size="lg" fullWidth onClick={() => run(action)}>
+      <BottomActionBar hint={hint}>
+        <Button
+          size="lg"
+          fullWidth
+          disabled={hint !== null || busy}
+          onClick={() => run(action)}
+        >
           {actionLabels[action]}
         </Button>
       </BottomActionBar>
