@@ -2,8 +2,6 @@ import type { GameView } from "@hmk/contracts/games";
 import type { RoundViewResponse } from "@hmk/contracts/rounds";
 import type { RevealResponse } from "@hmk/contracts/scoring";
 import {
-  BottomActionBar,
-  Button,
   QuestionCard,
   RevealList,
   RevealRuler,
@@ -12,18 +10,13 @@ import {
   TopBar,
 } from "@hmk/ui";
 import type { RevealListEntry } from "@hmk/ui";
-import type { ReactNode } from "react";
-import { useNavigate } from "react-router";
 
 import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useView } from "../../shell/use-view.ts";
 
-export interface RevealScreenProps {
-  gameCode: string;
-  bottomSlot?: ReactNode;
-  onNavigateToScoreboard?: () => void;
-}
+export type RevealScreenProps = SceneScreenProps;
 
 const scoreReason = (points: number): "exact" | "closest" | undefined => {
   if (points === 5) {
@@ -58,28 +51,13 @@ const toRevealEntries = (
   return [...answeredEntries, ...missingEntries];
 };
 
-const RevealBottom = ({
-  bottomSlot,
-  onNavigate,
-}: {
-  bottomSlot?: ReactNode;
-  onNavigate: () => void;
-}) => (
-  <BottomActionBar>
-    {bottomSlot ?? (
-      <Button size="lg" fullWidth icon="trophy" onClick={onNavigate}>
-        Ver clasificación
-      </Button>
-    )}
-  </BottomActionBar>
-);
-
 export const RevealScreen = ({
-  gameCode,
-  bottomSlot,
-  onNavigateToScoreboard,
+  code: gameCode,
+  round: currentRound,
+  bottom,
+  banner,
+  overlays,
 }: RevealScreenProps) => {
-  const navigate = useNavigate();
   const { data: session } = authClient.useSession();
   const youId = session?.user?.id;
 
@@ -87,18 +65,12 @@ export const RevealScreen = ({
     api<GameView>(`/games/${gameCode}`)
   );
 
-  const currentRound = game?.currentRound ?? null;
-
   const { data: round } = useView(["round", gameCode, currentRound], () =>
-    currentRound === null
-      ? Promise.resolve(null as unknown as RoundViewResponse)
-      : api<RoundViewResponse>(`/rounds/${gameCode}/${currentRound}`)
+    api<RoundViewResponse>(`/rounds/${gameCode}/${currentRound}`)
   );
 
   const { data: reveal } = useView(["reveal", gameCode, currentRound], () =>
-    currentRound === null
-      ? Promise.resolve(null as unknown as RevealResponse)
-      : api<RevealResponse>(`/scoring/${gameCode}/${currentRound}/reveal`)
+    api<RevealResponse>(`/scoring/${gameCode}/${currentRound}/reveal`)
   );
 
   const allEntries = toRevealEntries(game?.players, reveal?.estimates);
@@ -113,26 +85,18 @@ export const RevealScreen = ({
   const unit = round?.unit ?? "";
   const solution = reveal?.solution ?? 0;
 
-  const handleNavigate = () => {
-    if (onNavigateToScoreboard) {
-      onNavigateToScoreboard();
-    } else {
-      navigate(gameCode ? `/scoreboard/${gameCode}` : "/scoreboard");
-    }
-  };
-
   return (
     <Screen
       top={
         <TopBar
           gameCode={gameCode}
-          round={currentRound ?? undefined}
+          round={currentRound}
           totalRounds={game?.settings?.rounds}
         />
       }
-      bottom={
-        <RevealBottom bottomSlot={bottomSlot} onNavigate={handleNavigate} />
-      }
+      bottom={bottom}
+      banner={banner}
+      overlays={overlays}
     >
       <Stack gap={5}>
         {round?.question ? (

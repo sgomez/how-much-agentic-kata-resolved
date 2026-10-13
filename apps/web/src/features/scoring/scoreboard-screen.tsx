@@ -1,26 +1,18 @@
 import type { ScoreboardResponse } from "@hmk/contracts/scoring";
-import {
-  BottomActionBar,
-  Heading,
-  Scoreboard,
-  Screen,
-  Stack,
-  TopBar,
-} from "@hmk/ui";
-import type { ReactNode } from "react";
+import { Heading, Scoreboard, Screen, Stack, TopBar } from "@hmk/ui";
 
 import { api } from "../../shell/api.ts";
 import { authClient } from "../../shell/auth-client.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useView } from "../../shell/use-view.ts";
 
-export interface ScoreboardScreenProps {
-  gameCode: string;
-  bottomSlot?: ReactNode;
-}
+export type ScoreboardScreenProps = SceneScreenProps;
 
 export const ScoreboardScreen = ({
-  gameCode,
-  bottomSlot,
+  code: gameCode,
+  bottom,
+  banner,
+  overlays,
 }: ScoreboardScreenProps) => {
   const { data: session } = authClient.useSession();
   const youId = session?.user?.id;
@@ -38,9 +30,9 @@ export const ScoreboardScreen = ({
   return (
     <Screen
       top={<TopBar gameCode={gameCode} />}
-      bottom={
-        bottomSlot ? <BottomActionBar>{bottomSlot}</BottomActionBar> : undefined
-      }
+      bottom={bottom}
+      banner={banner}
+      overlays={overlays}
     >
       <Stack gap={4}>
         <Heading level={1}>Clasificación</Heading>

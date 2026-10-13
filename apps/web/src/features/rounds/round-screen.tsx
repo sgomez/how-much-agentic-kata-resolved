@@ -17,21 +17,25 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 
 import { ApiError, api } from "../../shell/api.ts";
+import type { SceneScreenProps } from "../../shell/scene.ts";
 import { useView } from "../../shell/use-view.ts";
 import { AfterSendingScreen } from "./after-sending-screen.tsx";
 
-export interface RoundScreenProps {
-  gameCode: string;
-  bottomSlot?: ReactNode;
-}
+export type RoundScreenProps = SceneScreenProps;
 
-export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
+export const RoundScreen = ({
+  code: gameCode,
+  round: currentRound,
+  bottom,
+  banner,
+  overlays,
+}: RoundScreenProps) => {
   const [selected, setSelected] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [editing, setEditing] = useState(false);
 
   const { data: game } = useView<GameView | null>(
-    ["games", gameCode],
+    ["game", gameCode],
     async () => {
       try {
         return await api<GameView>(`/games/${gameCode}`);
@@ -44,13 +48,9 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
     }
   );
 
-  const currentRound = game?.currentRound;
   const { data: roundView } = useView<RoundViewResponse | null>(
-    ["rounds", gameCode, currentRound],
+    ["round", gameCode, currentRound],
     async () => {
-      if (currentRound === null || currentRound === undefined) {
-        return null;
-      }
       try {
         return await api<RoundViewResponse>(
           `/rounds/${gameCode}/${currentRound}`
@@ -68,9 +68,6 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
     useView<ListEstimatesResponse | null>(
       ["scoring", gameCode, currentRound],
       async () => {
-        if (currentRound === null || currentRound === undefined) {
-          return null;
-        }
         try {
           return await api<ListEstimatesResponse>(
             `/scoring/${gameCode}/${currentRound}/estimates`
@@ -84,15 +81,13 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
       }
     );
 
-  if (!game || !currentRound || !roundView) {
+  if (!game || !roundView) {
     return (
       <Screen
         top={<TopBar gameCode={gameCode} />}
-        bottom={
-          bottomSlot ? (
-            <BottomActionBar>{bottomSlot}</BottomActionBar>
-          ) : undefined
-        }
+        bottom={bottom}
+        banner={banner}
+        overlays={overlays}
       >
         <Stack gap={4}>
           <Skeleton shape="block" height={120} />
@@ -108,8 +103,11 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
   if (isSent && !editing) {
     return (
       <AfterSendingScreen
-        gameCode={gameCode}
-        bottomSlot={bottomSlot}
+        code={gameCode}
+        round={currentRound}
+        bottom={bottom}
+        banner={banner}
+        overlays={overlays}
         onEdit={() => setEditing(true)}
       />
     );
@@ -123,11 +121,7 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
       new Date(roundView.deadline).getTime();
 
   const handleSend = async () => {
-    if (
-      currentValue === null ||
-      currentRound === null ||
-      currentRound === undefined
-    ) {
+    if (currentValue === null) {
       return;
     }
     setSubmitting(true);
@@ -221,9 +215,11 @@ export const RoundScreen = ({ gameCode, bottomSlot }: RoundScreenProps) => {
         <BottomActionBar hint={roundHint()}>
           <AnswerTracker players={trackerPlayers} compact />
           {action}
-          {bottomSlot}
+          {bottom}
         </BottomActionBar>
       }
+      banner={banner}
+      overlays={overlays}
     >
       <Stack gap={4} grow>
         <QuestionCard

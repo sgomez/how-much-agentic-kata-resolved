@@ -64,15 +64,15 @@ const mockScoring: ListEstimatesResponse = {
 describe(AfterSendingScreen, () => {
   it("disables Cambiar mi estimación button and shows time-up hint when deadline has passed", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], {
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], {
       ...mockRound,
       phase: "revealed",
     });
     queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
 
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 
@@ -84,7 +84,7 @@ describe(AfterSendingScreen, () => {
   it("renders loading skeleton when round data is not yet loaded", () => {
     const queryClient = createTestQueryClient();
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 
@@ -94,12 +94,12 @@ describe(AfterSendingScreen, () => {
 
   it("renders sent estimate card with formatted value and unit", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
 
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 
@@ -111,12 +111,12 @@ describe(AfterSendingScreen, () => {
 
   it("renders AnswerTracker with answered count", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
 
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 
@@ -127,12 +127,12 @@ describe(AfterSendingScreen, () => {
 
   it("renders PlayerList with answer status without exposing values", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
 
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 
@@ -145,14 +145,15 @@ describe(AfterSendingScreen, () => {
 
   it("renders bottom action bar with Cambiar mi estimación button and hint", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], mockScoring);
 
     const html = renderWithClient(
       <AfterSendingScreen
-        gameCode="ABCD"
-        bottomSlot={<button type="button">Extra action</button>}
+        code="ABCD"
+        round={1}
+        bottom={<button type="button">Extra action</button>}
       />,
       queryClient
     );
@@ -164,15 +165,15 @@ describe(AfterSendingScreen, () => {
 
   it("shows message when everyone has answered", () => {
     const queryClient = createTestQueryClient();
-    queryClient.setQueryData(["games", "ABCD"], mockGame);
-    queryClient.setQueryData(["rounds", "ABCD", 1], mockRound);
+    queryClient.setQueryData(["game", "ABCD"], mockGame);
+    queryClient.setQueryData(["round", "ABCD", 1], mockRound);
     queryClient.setQueryData(["scoring", "ABCD", 1], {
       answered: ["host-1", "p-2"],
       myEstimate: 21_000,
     });
 
     const html = renderWithClient(
-      <AfterSendingScreen gameCode="ABCD" />,
+      <AfterSendingScreen code="ABCD" round={1} />,
       queryClient
     );
 

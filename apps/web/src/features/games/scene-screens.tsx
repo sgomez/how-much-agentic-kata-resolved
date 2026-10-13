@@ -1,33 +1,22 @@
-import { EmptyState, Screen, Spinner, Stack, TopBar } from "@hmk/ui";
+import { Screen, Spinner, Stack, TopBar } from "@hmk/ui";
+import type { ReactNode } from "react";
 
+import type { SceneScreenProps } from "../../shell/scene.ts";
+import { VerdictScreen, VotingScreen } from "../impostor/index.ts";
+import { RoundScreen } from "../rounds/index.ts";
+import {
+  FinalRankingScreen,
+  RevealScreen,
+  ScoreboardScreen,
+} from "../scoring/index.ts";
 import { LobbyScreen } from "./lobby-screen.tsx";
 import type { SceneScreen } from "./scene-director.ts";
-import type { SceneScreenProps } from "./scene-screen-props.ts";
 
-const Placeholder = ({
-  title,
-  group,
+const Loading = ({
   code,
-  bottom,
   banner,
   overlays,
-}: SceneScreenProps & { title: string; group: string }) => (
-  <Screen
-    top={<TopBar gameCode={code} />}
-    bottom={bottom}
-    banner={banner}
-    overlays={overlays}
-    centered
-  >
-    <EmptyState
-      icon="ruler"
-      title={title}
-      description={`Esta pantalla la construye el grupo «${group}».`}
-    />
-  </Screen>
-);
-
-const Loading = ({ code, banner, overlays }: SceneScreenProps) => (
+}: Pick<SceneScreenProps, "code" | "banner" | "overlays">) => (
   <Screen
     top={<TopBar gameCode={code} />}
     banner={banner}
@@ -40,29 +29,33 @@ const Loading = ({ code, banner, overlays }: SceneScreenProps) => (
   </Screen>
 );
 
-// Screens of the other groups not exported yet. When a group exports its screen
-// from its feature `index.ts`, import it here and render it instead of the placeholder.
-const placeholders: Record<
+const screens: Record<
   Exclude<SceneScreen, "loading" | "lobby">,
-  { title: string; group: string }
+  (props: SceneScreenProps) => ReactNode
 > = {
-  round: { title: "Ronda", group: "rounds" },
-  reveal: { title: "Resultado de la ronda", group: "scoring" },
-  voting: { title: "Votación", group: "impostor" },
-  verdict: { title: "Veredicto", group: "impostor" },
-  scoreboard: { title: "Clasificación", group: "scoring" },
-  "final-ranking": { title: "Clasificación final", group: "scoring" },
+  round: RoundScreen,
+  reveal: RevealScreen,
+  voting: VotingScreen,
+  verdict: VerdictScreen,
+  scoreboard: ScoreboardScreen,
+  "final-ranking": FinalRankingScreen,
 };
 
+/** `round` is null while the game is in the lobby; every later screen needs it. */
 export const SceneScreenView = ({
   screen,
+  round,
   ...props
-}: SceneScreenProps & { screen: SceneScreen }) => {
-  if (screen === "loading") {
-    return <Loading {...props} />;
-  }
+}: Omit<SceneScreenProps, "round"> & {
+  screen: SceneScreen;
+  round?: number | null;
+}) => {
   if (screen === "lobby") {
     return <LobbyScreen {...props} />;
   }
-  return <Placeholder {...props} {...placeholders[screen]} />;
+  if (screen === "loading" || round === null || round === undefined) {
+    return <Loading {...props} />;
+  }
+  const Current = screens[screen];
+  return <Current {...props} round={round} />;
 };
