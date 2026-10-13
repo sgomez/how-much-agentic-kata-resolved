@@ -52,8 +52,8 @@ export const CreateRoundRequest = z
     /** Every player of the game, host included, in order of joining. */
     players: z.array(RoundPlayer).min(1),
     hostId: z.string().min(1),
-    /** Packs to draw the question from, passed as is to the catalog. */
-    packs: z.array(z.string().min(1)).min(1),
+    /** Packs to draw the question from, passed as is to the catalog. Omit it to draw from every pack. */
+    packs: z.array(z.string().min(1)).min(1).optional(),
     roundSeconds: z.number().int().positive(),
     impostorMode: z.boolean(),
   })
