@@ -1,6 +1,8 @@
 import type { GameView } from "@hmk/contracts/games";
 import type { RoundViewResponse } from "@hmk/contracts/rounds";
+import type { ListEstimatesResponse } from "@hmk/contracts/scoring";
 import {
+  AnswerTracker,
   BottomActionBar,
   Button,
   Countdown,
@@ -28,7 +30,8 @@ export const RoundScreen = ({
   bottomSlot,
   bottomAction,
 }: RoundScreenProps) => {
-  const [value, setValue] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const bottom = bottomSlot ?? bottomAction;
 
   const { data: game } = useView<GameView | null>(
@@ -65,6 +68,26 @@ export const RoundScreen = ({
     }
   );
 
+  const { data: estimates, refetch: refetchEstimates } =
+    useView<ListEstimatesResponse | null>(
+      ["scoring", gameCode, currentRound],
+      async () => {
+        if (currentRound === null || currentRound === undefined) {
+          return null;
+        }
+        try {
+          return await api<ListEstimatesResponse>(
+            `/scoring/${gameCode}/${currentRound}/estimates`
+          );
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 404) {
+            return null;
+          }
+          throw error;
+        }
+      }
+    );
+
   if (!game || !currentRound || !roundView) {
     return (
       <Screen
@@ -80,17 +103,91 @@ export const RoundScreen = ({
       </Screen>
     );
   }
-
+  const sentValue = estimates?.myEstimate ?? null;
+  const isSent = sentValue !== null;
+  const currentValue = selected ?? sentValue;
+  const changed = isSent && currentValue !== null && currentValue !== sentValue;
   const isTimeUp =
     roundView.phase === "revealed" ||
     new Date(roundView.serverNow).getTime() >=
       new Date(roundView.deadline).getTime();
 
-  let hint: string | undefined;
+  const handleSend = async () => {
+    if (
+      currentValue === null ||
+      currentRound === null ||
+      currentRound === undefined
+    ) {
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api(`/scoring/${gameCode}/${currentRound}/estimates`, {
+        method: "POST",
+        body: { value: currentValue },
+      });
+      setSelected(null);
+      await refetchEstimates();
+      setSubmitting(false);
+    } catch (error) {
+      setSubmitting(false);
+      throw error;
+    }
+  };
+
+  const roundHint = () => {
+    if (isTimeUp) {
+      return "Se acabó el tiempo";
+    }
+    if (currentValue === null) {
+      return "Elige un valor en la regla para enviar";
+    }
+    if (isSent) {
+      return changed
+        ? "Has movido la regla: pulsa Cambiar para enviarla"
+        : "Puedes cambiarla hasta que acabe el tiempo";
+    }
+  };
+
+  const trackerPlayers = (game.players ?? []).map((p) => ({
+    id: p.id,
+    name: p.nickname,
+    answered: estimates?.answered?.includes(p.id) ?? false,
+  }));
+
+  let action: ReactNode;
   if (isTimeUp) {
-    hint = "Se acabó el tiempo";
-  } else if (value === null) {
-    hint = "Elige un valor en la regla para enviar";
+    action = (
+      <Button size="lg" fullWidth disabled icon="clock">
+        Se acabó el tiempo
+      </Button>
+    );
+  } else if (isSent) {
+    action = (
+      <Button
+        size="lg"
+        fullWidth
+        icon="pencil"
+        disabled={!changed || submitting}
+        loading={submitting}
+        onClick={handleSend}
+      >
+        Cambiar
+      </Button>
+    );
+  } else {
+    action = (
+      <Button
+        size="lg"
+        fullWidth
+        icon="send"
+        disabled={currentValue === null || submitting}
+        loading={submitting}
+        onClick={handleSend}
+      >
+        Enviar
+      </Button>
+    );
   }
 
   return (
@@ -110,15 +207,9 @@ export const RoundScreen = ({
         />
       }
       bottom={
-        <BottomActionBar hint={hint}>
-          <Button
-            size="lg"
-            fullWidth
-            icon={isTimeUp ? "clock" : "send"}
-            disabled={isTimeUp || value === null}
-          >
-            {isTimeUp ? "Se acabó el tiempo" : "Enviar"}
-          </Button>
+        <BottomActionBar hint={roundHint()}>
+          <AnswerTracker players={trackerPlayers} compact />
+          {action}
           {bottom}
         </BottomActionBar>
       }
@@ -134,8 +225,9 @@ export const RoundScreen = ({
           max={roundView.max}
           unit={roundView.unit}
           scale="auto"
-          value={value}
-          onChange={setValue}
+          value={currentValue}
+          onChange={setSelected}
+          sentValue={sentValue}
           disabled={isTimeUp}
         />
       </Stack>
