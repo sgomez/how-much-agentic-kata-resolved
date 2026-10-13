@@ -42,7 +42,7 @@ describe("impostor", () => {
 
     await game.vote(
       Object.fromEntries(
-        PLAYERS.map((alias) => [
+        PLAYERS.filter((alias) => alias !== impostor).map((alias) => [
           alias,
           alias === scapegoat ? impostor : scapegoat,
         ])
@@ -61,7 +61,6 @@ describe("impostor", () => {
       solution: 270,
     });
     const impostor = await game.whoIsTheImpostor();
-    const anyone = PLAYERS.find((alias) => alias !== impostor) ?? "";
     // The impostor guesses far off, so any points they had would come from the vote.
     await game.estimate(
       Object.fromEntries(
@@ -72,7 +71,10 @@ describe("impostor", () => {
 
     await game.vote(
       Object.fromEntries(
-        PLAYERS.map((alias) => [alias, alias === impostor ? anyone : impostor])
+        PLAYERS.filter((alias) => alias !== impostor).map((alias) => [
+          alias,
+          impostor,
+        ])
       )
     );
     await game.waitForVotingToEnd();

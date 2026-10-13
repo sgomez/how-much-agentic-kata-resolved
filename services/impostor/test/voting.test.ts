@@ -217,12 +217,31 @@ describe("casting a vote", () => {
   it("ends the voting with the last candidate's vote", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Beto"));
-    await s.cast.execute(vote("u2", "Ana"));
+
+    const mid = await s.view.execute("ABCD", 1, "u1");
     await s.cast.execute(vote("u3", "Beto"));
+    const view = await s.view.execute("ABCD", 1, "u1");
+
+    expect([mid.voting, view.voting]).toStrictEqual(["open", "over"]);
+  });
+
+  it("is refused for the impostor, who does not vote", async () => {
+    const s = await openVoting();
+
+    await expect(s.cast.execute(vote("u2", "Ana"))).rejects.toMatchObject({
+      code: "impostor-cannot-vote",
+      kind: "forbidden",
+    });
+  });
+
+  it("leaves the voting open after the impostor's refused vote", async () => {
+    const s = await openVoting();
+    await s.cast.execute(vote("u1", "Beto"));
+    await s.cast.execute(vote("u2", "Ana")).catch(() => {});
 
     const view = await s.view.execute("ABCD", 1, "u1");
 
-    expect(view.voting).toBe("over");
+    expect(view.voting).toBe("open");
   });
 
   it("is refused once the voting is over", async () => {
@@ -289,7 +308,6 @@ describe("the verdict", () => {
   it("is caught when the impostor alone has the most votes", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Beto"));
-    await s.cast.execute(vote("u2", "Ana"));
     await s.cast.execute(vote("u3", "Beto"));
 
     await expect(s.verdict.execute("ABCD", 1)).resolves.toStrictEqual({
@@ -301,8 +319,7 @@ describe("the verdict", () => {
   it("is escaped when someone else has the most votes", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Carla"));
-    await s.cast.execute(vote("u2", "Carla"));
-    await s.cast.execute(vote("u3", "Beto"));
+    await s.cast.execute(vote("u3", "Ana"));
 
     await expect(s.verdict.execute("ABCD", 1)).resolves.toMatchObject({
       verdict: "escaped",
@@ -312,8 +329,7 @@ describe("the verdict", () => {
   it("is escaped on a tie for the most votes, the impostor included", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Beto"));
-    await s.cast.execute(vote("u2", "Ana"));
-    await s.close.execute({ ...round, userId: "u1" });
+    await s.cast.execute(vote("u3", "Ana"));
 
     await expect(s.verdict.execute("ABCD", 1)).resolves.toMatchObject({
       verdict: "escaped",
@@ -340,19 +356,23 @@ describe("the verdict", () => {
 });
 
 describe("the voting view", () => {
-  it("shows who voted but not whom for, and hides the impostor until over", async () => {
+  it("shows a candidate only their own vote, never whom for, and hides the impostor until over", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Beto"));
 
-    const view = await s.view.execute("ABCD", 1, "u3");
+    const [other, voter] = await Promise.all([
+      s.view.execute("ABCD", 1, "u3"),
+      s.view.execute("ABCD", 1, "u1"),
+    ]);
 
-    expect(view).toStrictEqual({
+    expect(other).toStrictEqual({
       candidates,
       impostorId: null,
       verdict: null,
-      voters: ["u1"],
+      voters: [],
       voting: "open",
     });
+    expect(voter.voters).toStrictEqual(["u1"]);
   });
 
   it("is refused to someone who is not a candidate", async () => {

@@ -90,14 +90,18 @@ export type VerdictResponse = z.infer<typeof VerdictResponse>;
 /**
  * GET /:code/:n (phones every second in impostor mode, from the reveal on:
  * the games scene director picks screen 07 or 08, and screens 07 Voting and
- * 08 Verdict draw it). Everyone in the round sees the same view.
+ * 08 Verdict draw it). Everyone in the round sees the same view,
+ * except `voters`.
  */
 export const VotingView = z
   .object({
     voting: VotingStatus,
     /** Who can be voted for: the copy Rounds sent. */
     candidates: z.array(Candidate),
-    /** Ids of the players who have already voted. Never who they voted for. */
+    /**
+     * Holds the caller's id once they have voted, nobody else's: the one who
+     * never votes is the impostor, so a longer list would give them away.
+     */
     voters: z.array(z.string().min(1)),
     /** Null until `voting` is `over`. */
     verdict: Verdict.nullable(),
@@ -120,8 +124,9 @@ export type VotingView = z.infer<typeof VotingView>;
 
 /**
  * POST /:code/:n/votes (each player's phone). The voter comes from the token.
- * One vote per player, final, never for yourself. The vote of the last
- * candidate ends the voting. 204 with no body in the response.
+ * One vote per player, final, never for yourself. The impostor of the round
+ * does not vote: their vote is refused with 403 `impostor-cannot-vote`. The
+ * vote of the last candidate but the impostor ends the voting. 204 with no body in the response.
  */
 export const CastVoteRequest = z.object({
   /** Matched against `candidates[].nickname` ignoring case and leading/trailing spaces. */
