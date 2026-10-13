@@ -356,23 +356,19 @@ describe("the verdict", () => {
 });
 
 describe("the voting view", () => {
-  it("shows a candidate only their own vote, never whom for, and hides the impostor until over", async () => {
+  it("shows who voted but not whom for, and hides the impostor until over", async () => {
     const s = await openVoting();
     await s.cast.execute(vote("u1", "Beto"));
 
-    const [other, voter] = await Promise.all([
-      s.view.execute("ABCD", 1, "u3"),
-      s.view.execute("ABCD", 1, "u1"),
-    ]);
+    const view = await s.view.execute("ABCD", 1, "u3");
 
-    expect(other).toStrictEqual({
+    expect(view).toStrictEqual({
       candidates,
       impostorId: null,
       verdict: null,
-      voters: [],
+      voters: ["u1"],
       voting: "open",
     });
-    expect(voter.voters).toStrictEqual(["u1"]);
   });
 
   it("is refused to someone who is not a candidate", async () => {

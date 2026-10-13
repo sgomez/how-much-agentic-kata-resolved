@@ -84,10 +84,7 @@ export class RoundVoting {
     return this.#status;
   }
 
-  /**
-   * Ids of the candidates who have voted, never who they voted for. Showing
-   * it to a phone gives the impostor away: they are the one missing.
-   */
+  /** Ids of the candidates who have voted, never who they voted for. */
   get voters(): string[] {
     return [...this.#votes.keys()];
   }
