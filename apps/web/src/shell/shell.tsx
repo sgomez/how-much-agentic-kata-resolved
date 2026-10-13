@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
-import { HomePage } from "./home-page.tsx";
+import { DevPage } from "./dev-page.tsx";
 import { Layout } from "./layout.tsx";
 import { NotFoundPage } from "./not-found-page.tsx";
 import { queryClient } from "./query-client.ts";
@@ -19,7 +19,7 @@ export const createAppRouter = (featureRoutes: RouteObject[]) =>
         { path: "/sign-in", element: <SignInPage /> },
         {
           element: <RequireNickname />,
-          children: [{ index: true, element: <HomePage /> }, ...featureRoutes],
+          children: [{ path: "/dev", element: <DevPage /> }, ...featureRoutes],
         },
         { path: "*", element: <NotFoundPage /> },
       ],

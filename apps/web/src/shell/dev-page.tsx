@@ -16,8 +16,8 @@ import { useNavigate } from "react-router";
 import { api } from "./api.ts";
 import { authClient } from "./auth-client.ts";
 
-/** Entry point: the games page (the scene director mounts every other screen from there), plus a system check. */
-const SCREENS = [{ to: "/games", label: "Partidas" }] as const;
+/** Developer panel at `/dev`: links to the screens plus a system check. Nothing in the game links here. */
+const SCREENS = [{ to: "/", label: "Inicio: crear o unirse" }] as const;
 
 const CatalogStatus = () => {
   const { data, isError, isPending } = useQuery({
@@ -41,7 +41,7 @@ const CatalogStatus = () => {
   );
 };
 
-export const HomePage = () => {
+export const DevPage = () => {
   const navigate = useNavigate();
   const { data: session } = authClient.useSession();
   const player = session?.user;
@@ -62,7 +62,7 @@ export const HomePage = () => {
     >
       <Stack gap={6}>
         <Heading level={1} size="display">
-          ¡Hola{player === undefined ? "" : `, ${player.name}`}!
+          Panel de desarrollo
         </Heading>
         <Card>
           <Stack gap={3}>

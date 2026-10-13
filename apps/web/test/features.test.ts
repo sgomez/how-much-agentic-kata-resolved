@@ -13,4 +13,8 @@ describe("feature routes", () => {
 
     expect(new Set(paths).size).toBe(paths.length);
   });
+
+  it("put the games home at the root", () => {
+    expect(games.map((route) => route.path)).toContain("/");
+  });
 });
