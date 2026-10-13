@@ -10,7 +10,7 @@ The rounds of every game: which question each one asks, until when players can e
 
 **Round length**: How long players of a round have to estimate, set by the game's settings. _Avoid_: Duration, timer
 
-**Deadline**: The moment a round stops taking estimates: the moment it was created plus its round length. It is set once and never changes, and only the deadline ends a round. _Avoid_: Timeout, end time, endsAt
+**Deadline**: The moment a round stops taking estimates: the moment the game first asked for the round plus its round length. It is set once and never changes, not even when the game asks for the same round again, and only the deadline ends a round. _Avoid_: Timeout, end time, endsAt
 
 **Estimating**: The phase of a round before its deadline. _Avoid_: Open, active, in progress
 
